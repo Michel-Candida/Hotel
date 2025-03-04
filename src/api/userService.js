@@ -6,7 +6,7 @@ function App() {
 
     useEffect(() => {
         // Fazendo a requisição para o back-end com axios
-        axios.get('http://hotel_backend:5000/api/users')
+        axios.get('http://localhost:5000/api/users')
         .then(response => setUsers(response.Data)) // Atualiza o estado com os dados
         .catch(error => console.error('Erro ao buscar usuários:', error));
     }, []);
@@ -26,7 +26,7 @@ function App() {
 export default App;
 
 const addUser = (user) => {
-    axios.post('http://hotel_backend:5000/api/users', user)
+    axios.post('http://localhost:5000/api/users', user)
     .then(response => console.log('Usuário adicionado:', response.data))
     .catch(error => console.error('Erro ao adicionar usuário:', error));
 };

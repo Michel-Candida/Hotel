@@ -14,8 +14,11 @@ const RecoveryLogin = () => {
     return (
         <div>
             <Link to="/" className="back-button">
-                Voltar</Link>
+                Voltar
+            </Link>
+
             <h2>Redefinir Senha</h2>
+            
             <form onSubmit={handleSubmit}>
                 <label>
                     Email:

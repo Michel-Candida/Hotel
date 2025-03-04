@@ -121,3 +121,62 @@ app.post('/api/login', async (req, res) => {
     res.status(500).send('Erro ao fazer login');
   }
 });
+
+//Buscar cliente pelo código
+app.get('/clientes/:clientCode', async (req, res) => {
+  const { clientCode } = req.params;
+  try {
+      const result = await pool.query('SELECT * FROM clientes WHERE ClientCode = $1', [clientCode]);
+      if (result.rows.length === 0) {
+          return res.status(404).json({ message: 'Cliente não encontrado' });
+      }
+      res.json(result.rows[0]);
+  } catch (error) {
+      console.error('Erro ao buscar cliente:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+  }
+});
+
+//Buscar acompanhante pelo código
+app.get('/companions/:companionCode', async (req, res) => {
+  const { companionCode } = req.params;
+  try {
+      const result = await pool.query('SELECT * FROM acompanhantes WHERE id = $1', [companionCode]);
+      if (result.rows.length === 0) {
+          return res.status(404).json({ message: 'Acompanhante não encontrado' });
+      }
+      res.json(result.rows[0]);
+  } catch (error) {
+      console.error('Erro ao buscar acompanhante:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+  }
+});
+
+//Realizar check-in
+app.post('/checkin', async (req, res) => {
+  const { clientCode, roomNumber, checkInDate, numberOfPeople, companions } = req.body;
+
+  try {
+      // Inserir check-in no banco
+      const result = await pool.query(
+          'INSERT INTO checkins (client_code, room_number, checkin_date, num_people) VALUES ($1, $2, $3, $4) RETURNING id',
+          [clientCode, roomNumber, checkInDate, numberOfPeople]
+      );
+
+      const checkInId = result.rows[0].id;
+
+      // Inserir acompanhantes, se houver
+      for (const companion of companions) {
+          await pool.query(
+              'INSERT INTO checkin_companions (checkin_id, companion_code) VALUES ($1, $2)',
+              [checkInId, companion.code]
+          );
+      }
+
+      res.status(201).json({ message: 'Check-in realizado com sucesso!' });
+  } catch (error) {
+      console.error('Erro ao realizar check-in:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+  }
+});
+
