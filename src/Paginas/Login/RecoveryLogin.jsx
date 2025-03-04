@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import './StyleLogin.css';
+import { Link } from 'react-router-dom';
+import './RecoveryLogin.css';
 
 const RecoveryLogin = () => {
     const [email, setEmail] = useState('');
@@ -12,6 +13,8 @@ const RecoveryLogin = () => {
 
     return (
         <div>
+            <Link to="/" className="back-button">
+                Voltar</Link>
             <h2>Redefinir Senha</h2>
             <form onSubmit={handleSubmit}>
                 <label>
