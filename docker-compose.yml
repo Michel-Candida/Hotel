@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: hotel_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: hotel_admin
+      POSTGRES_PASSWORD: Dba@123
+      POSTGRES_DB: hotel_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - hotel_data:/var/lib/postgresql/data
+    networks:
+      - hotel_network
+
+  backend:
+    build: ./backend
+    container_name: hotel_backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_USER: hotel_admin
+      DB_PASSWORD: Dba@123
+      DB_NAME: hotel_db
+      PORT: 5000
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+    command: yarn dev
+    networks:
+      - hotel_network
+
+  frontend:
+    build: ./frontend
+    container_name: hotel_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    working_dir: /app
+    command: yarn start
+    networks:
+      - hotel_network
+
+volumes:
+  hotel_data:
+
+networks:
+  hotel_network:

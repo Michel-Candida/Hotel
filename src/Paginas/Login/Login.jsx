@@ -1,58 +1,84 @@
 import React, { useState } from 'react';
 import './StyleLogin.css';
-import RecoveryLogin from './RecoveryLogin';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Login = () => {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const handleForgotPassword = () => {
-        alert('Redirecionando para recuperação de senha...');
-    };
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!username || !password) {
-            alert('Por favor, preencha todos os campos.');
-            return;
-        }
-        if (username !== 'admin' || password !== 'admin') {
-            alert('Usuário ou senha incorretos.');
-            return;
-        }
-        console.log('Usuário:', username);
-        console.log('Senha:', password);
-    };
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginSenha, setLoginSenha] = useState('');
+  const [mensagem, setMensagem] = useState('');
+  const navigate = useNavigate();
 
-    return (
-        <div className="login-container">
-            <h2>Login</h2>
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label htmlFor="username">Usuário:</label>
-                    <input
-                        type="text"
-                        id="username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="password">Senha:</label>
-                    <input
-                        type="password"
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                <button className="Button" type="submit">Entrar</button>
-            </form>
-            <button onClick={handleForgotPassword} className="recover-button">
-                Esqueceu a senha?
-            </button>
+  // Função para fazer login no backend
+  const fazerLogin = async () => {
+    try {
+      const response = await axios.post('http://hotel_backend:5000/api/login', {
+        email: loginEmail,
+        senha: loginSenha,
+      });
+      setMensagem(`Login bem-sucedido: ${response.data.usuario.email}`);
+      navigate('/Inicio'); // Redireciona para a página de dashboard (ou outra página)
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        setMensagem(error.response.data.message); // Exibe a mensagem de erro do backend
+      } else {
+        setMensagem('Erro ao fazer login');
+      }
+    }
+  };
+
+  // Função para lidar com o submit do formulário
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    // Verificação de campos obrigatórios
+    if (!loginEmail || !loginSenha) {
+      alert('Por favor, preencha todos os campos.');
+      return;
+    }
+
+    // Chama a função para realizar o login
+    fazerLogin();
+  };
+
+
+  return (
+    <div className="login-container">
+      <h2>Login</h2>
+      <form onSubmit={handleSubmit}>
+
+        <div className="form-group">
+          <label htmlFor="loginEmail">Email:</label>
+          <input
+            type="email"
+            id="loginEmail"
+            value={loginEmail}
+            onChange={(e) => setLoginEmail(e.target.value)}
+            required
+          />
         </div>
-    );
+
+        <div className="form-group">
+          <label htmlFor="loginSenha">Senha:</label>
+          <input
+            type="password"
+            id="loginSenha"
+            value={loginSenha}
+            onChange={(e) => setLoginSenha(e.target.value)}
+            required
+          />
+        </div>
+        <button className="Button" type="submit">Entrar</button>
+      </form>
+
+      <Link to="/recoverylogin" className="recover-button">
+          Esqueceu a senha? 
+      </Link>
+        
+      {mensagem && <p>{mensagem}</p>}
+
+    </div>
+  );
 };
 
 export default Login;
