@@ -16,14 +16,13 @@ const CheckIn = () => {
         companions: []
     });
 
-    // Função para buscar cliente no back-end
     const handleClientCodeChange = async (e) => {
         const clientCode = e.target.value;
-        setFormData({ ...formData, clientCode }); // Atualiza o código digitado
-
+        setFormData({ ...formData, clientCode });
+    
         if (clientCode.length > 0) {
             try {
-                const { data } = await axios.get(`https://seu-backend.com/clientes/${clientCode}`);
+                const { data } = await axios.get(`http://localhost:5000/clientes/${clientCode}`);
                 
                 setFormData({
                     ...formData,
@@ -39,17 +38,16 @@ const CheckIn = () => {
             }
         }
     };
-
-    // Função para buscar dados do acompanhante
+    
     const handleCompanionCodeChange = async (index, e) => {
         const companionCode = e.target.value;
         const companions = [...formData.companions];
-
+    
         companions[index] = { ...companions[index], code: companionCode };
-
+    
         if (companionCode.length > 0) {
             try {
-                const { data } = await axios.get(`https://seu-backend.com/companions/${companionCode}`);
+                const { data } = await axios.get(`http://localhost:5000/companions/${companionCode}`);
                 
                 companions[index] = {
                     ...companions[index],
@@ -61,7 +59,7 @@ const CheckIn = () => {
                 alert("Acompanhante não encontrado!");
             }
         }
-
+    
         setFormData({ ...formData, companions });
     };
 
@@ -78,7 +76,7 @@ const CheckIn = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('https://seu-backend.com/checkin', formData);
+            await axios.post('http://localhost:5000/checkin', formData);
             alert("Check-in realizado com sucesso!");
         } catch (error) {
             console.error("Erro ao fazer check-in:", error);

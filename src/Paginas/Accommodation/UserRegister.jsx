@@ -4,7 +4,7 @@ import './UserRegister.css';
 
 const UserRegister = () => {
     const [formData, setFormData] = useState({
-        clientCode: '',
+        client_code: '',
         name: '',
         email: '',
         phone: '',
@@ -12,16 +12,17 @@ const UserRegister = () => {
     });
 
     const [nextClientCode, setNextClientCode] = useState(null);
-    const [loadingCode, setLoadingCode] = useState(false); 
+    const [loadingCode, setLoadingCode] = useState(false);
 
     useEffect(() => {
         fetchNextClientCode();
     }, []);
 
+    // Busca o próximo código disponível no backend
     const fetchNextClientCode = async () => {
         setLoadingCode(true);
         try {
-            const { data } = await axios.get('https://seu-backend.com/clientes/proximo-codigo');
+            const { data } = await axios.get('http://localhost:5000/clientes/proximo-codigo');
             setNextClientCode(data.nextClientCode);
         } catch (error) {
             console.error("Erro ao buscar o próximo código de cliente:", error);
@@ -30,17 +31,19 @@ const UserRegister = () => {
         }
     };
 
+    // Insere o próximo código disponível no formulário
     const handleInsertClient = () => {
         if (nextClientCode !== null) {
             setFormData((prevData) => ({
                 ...prevData,
-                clientCode: nextClientCode
+                client_code: nextClientCode
             }));
         } else {
             alert("Código ainda não carregado. Aguarde um momento.");
         }
     };
 
+    // Atualiza os valores do formulário
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -49,21 +52,22 @@ const UserRegister = () => {
         });
     };
 
+    // Envia os dados do formulário para o backend
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.clientCode) {
+        if (!formData.client_code) {
             alert("Por favor, clique em 'Inserir Novo Cliente' para gerar um código.");
             return;
         }
 
         try {
-            await axios.post('https://seu-backend.com/clientes', formData);
+            await axios.post('http://localhost:5000/clientes', formData);
             alert("Cliente registrado com sucesso!");
 
             fetchNextClientCode();
 
             setFormData({
-                clientCode: '',
+                client_code: '',
                 name: '',
                 email: '',
                 phone: '',
@@ -81,13 +85,13 @@ const UserRegister = () => {
             <button 
                 className="insert-button" 
                 onClick={handleInsertClient} 
-                disabled={loadingCode || formData.clientCode !== ''}>
+                disabled={loadingCode || formData.client_code !== ''}>
                 {loadingCode ? "Carregando Código..." : "Inserir Novo Cliente"}
             </button>
             <form onSubmit={handleSubmit}>
                 <div>
                     <label>Código do Cliente:</label>
-                    <input type="text" name="clientCode" value={formData.clientCode} readOnly />
+                    <input type="text" name="clientCode" value={formData.client_code} readOnly />
                 </div>
                 <div>
                     <label>Nome:</label>

@@ -122,61 +122,73 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-//Buscar cliente pelo código
-app.get('/clientes/:clientCode', async (req, res) => {
-  const { clientCode } = req.params;
+// Rota para buscar cliente por código
+app.get('/clientes/client_code', async (req, res) => {
   try {
-      const result = await pool.query('SELECT * FROM clientes WHERE ClientCode = $1', [clientCode]);
+      const { clientCode } = req.params;
+      const result = await pool.query('SELECT * FROM clientes WHERE client_code = $1', [clientCode]);
+
       if (result.rows.length === 0) {
-          return res.status(404).json({ message: 'Cliente não encontrado' });
+          return res.status(404).json({ message: "Cliente não encontrado" });
       }
+
       res.json(result.rows[0]);
   } catch (error) {
-      console.error('Erro ao buscar cliente:', error);
-      res.status(500).json({ message: 'Erro interno do servidor' });
+      console.error("Erro ao buscar cliente:", error);
+      res.status(500).json({ message: "Erro no servidor" });
   }
 });
 
-//Buscar acompanhante pelo código
-app.get('/companions/:companionCode', async (req, res) => {
-  const { companionCode } = req.params;
+// Rota para buscar acompanhante por código
+app.get('/companions/code', async (req, res) => {
   try {
-      const result = await pool.query('SELECT * FROM acompanhantes WHERE id = $1', [companionCode]);
+      const { code } = req.params;
+      const result = await pool.query('SELECT * FROM companions WHERE code = $1', [code]);
+
       if (result.rows.length === 0) {
-          return res.status(404).json({ message: 'Acompanhante não encontrado' });
+          return res.status(404).json({ message: "Acompanhante não encontrado" });
       }
+
       res.json(result.rows[0]);
   } catch (error) {
-      console.error('Erro ao buscar acompanhante:', error);
-      res.status(500).json({ message: 'Erro interno do servidor' });
+      console.error("Erro ao buscar acompanhante:", error);
+      res.status(500).json({ message: "Erro no servidor" });
   }
 });
 
-//Realizar check-in
-app.post('/checkin', async (req, res) => {
-  const { clientCode, roomNumber, checkInDate, numberOfPeople, companions } = req.body;
+// Rota para fazer check-in
+app.post('/checkin', (req, res) => {
+  console.log("Check-in recebido:", req.body);
+  res.status(201).json({ message: 'Check-in realizado com sucesso' });
+});
 
+app.get('/clientes/proximo-codigo', async (req, res) => {
   try {
-      // Inserir check-in no banco
-      const result = await pool.query(
-          'INSERT INTO checkins (client_code, room_number, checkin_date, num_people) VALUES ($1, $2, $3, $4) RETURNING id',
-          [clientCode, roomNumber, checkInDate, numberOfPeople]
+      const result = await pool.query(`
+          SELECT COALESCE(MAX(client_code), 0) + 1 AS next_code FROM clientes
+      `);
+      
+      console.log("Próximo código de cliente:", result.rows[0].next_code);
+      res.json({ nextClientCode: result.rows[0].next_code });
+
+  } catch (error) {
+      console.error("Erro ao buscar próximo código de cliente:", error);
+      res.status(500).json({ message: "Erro no servidor", error: error.message });
+  }
+});
+
+app.post('/clientes', async (req, res) => {
+  try {
+      const { client_code, name, email, phone_number, address } = req.body;
+
+      await pool.query(
+          'INSERT INTO clientes (client_code, name, email, phone_number, address) VALUES ($1, $2, $3, $4, $5)',
+          [client_code, name, email, phone_number, address]
       );
 
-      const checkInId = result.rows[0].id;
-
-      // Inserir acompanhantes, se houver
-      for (const companion of companions) {
-          await pool.query(
-              'INSERT INTO checkin_companions (checkin_id, companion_code) VALUES ($1, $2)',
-              [checkInId, companion.code]
-          );
-      }
-
-      res.status(201).json({ message: 'Check-in realizado com sucesso!' });
+      res.status(201).json({ message: "Cliente registrado com sucesso!" });
   } catch (error) {
-      console.error('Erro ao realizar check-in:', error);
-      res.status(500).json({ message: 'Erro interno do servidor' });
+      console.error("Erro ao registrar cliente:", error);
+      res.status(500).json({ message: "Erro no servidor" });
   }
 });
-
