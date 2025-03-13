@@ -8,7 +8,7 @@ const UserRegister = () => {
         name: '',
         email: '',
         phone: '',
-        address: ''
+        document: ''
     });
 
     const [nextClientCode, setNextClientCode] = useState(null);
@@ -18,20 +18,20 @@ const UserRegister = () => {
         fetchNextClientCode();
     }, []);
 
-    // Busca o próximo código disponível no backend
+    // Fetch the next available client code from the backend
     const fetchNextClientCode = async () => {
         setLoadingCode(true);
         try {
-            const { data } = await axios.get('http://localhost:5000/clientes/proximo-codigo');
+            const { data } = await axios.get('http://localhost:5000/clients/next-code');
             setNextClientCode(data.nextClientCode);
         } catch (error) {
-            console.error("Erro ao buscar o próximo código de cliente:", error);
+            console.error("Error fetching the next client code:", error);
         } finally {
             setLoadingCode(false);
         }
     };
 
-    // Insere o próximo código disponível no formulário
+    // Insert the next available code into the form
     const handleInsertClient = () => {
         if (nextClientCode !== null) {
             setFormData((prevData) => ({
@@ -39,11 +39,11 @@ const UserRegister = () => {
                 client_code: nextClientCode
             }));
         } else {
-            alert("Código ainda não carregado. Aguarde um momento.");
+            alert("Code not loaded yet. Please wait a moment.");
         }
     };
 
-    // Atualiza os valores do formulário
+    // Update form values
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -52,17 +52,17 @@ const UserRegister = () => {
         });
     };
 
-    // Envia os dados do formulário para o backend
+    // Submit form data to the backend
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.client_code) {
-            alert("Por favor, clique em 'Inserir Novo Cliente' para gerar um código.");
+            alert("Please click 'Insert New Client' to generate a code.");
             return;
         }
 
         try {
-            await axios.post('http://localhost:5000/clientes', formData);
-            alert("Cliente registrado com sucesso!");
+            await axios.post('http://localhost:5000/clients', formData);
+            alert("Client registered successfully!");
 
             fetchNextClientCode();
 
@@ -71,30 +71,30 @@ const UserRegister = () => {
                 name: '',
                 email: '',
                 phone: '',
-                address: ''
+                document: ''
             });
         } catch (error) {
-            console.error("Erro ao registrar cliente:", error);
-            alert("Erro ao registrar cliente.");
+            console.error("Error registering client:", error);
+            alert("Error registering client.");
         }
     };
 
     return (
         <div className="container">
-            <h2>Cadastro de Cliente</h2>
+            <h2>Client Registration</h2>
             <button 
                 className="insert-button" 
                 onClick={handleInsertClient} 
                 disabled={loadingCode || formData.client_code !== ''}>
-                {loadingCode ? "Carregando Código..." : "Inserir Novo Cliente"}
+                {loadingCode ? "Loading Code..." : "Insert New Client"}
             </button>
             <form onSubmit={handleSubmit}>
                 <div>
-                    <label>Código do Cliente:</label>
+                    <label>Client Code:</label>
                     <input type="text" name="clientCode" value={formData.client_code} readOnly />
                 </div>
                 <div>
-                    <label>Nome:</label>
+                    <label>Name:</label>
                     <input type="text" name="name" value={formData.name} onChange={handleChange} required />
                 </div>
                 <div>
@@ -102,14 +102,14 @@ const UserRegister = () => {
                     <input type="email" name="email" value={formData.email} onChange={handleChange} required />
                 </div>
                 <div>
-                    <label>Telefone:</label>
+                    <label>Phone:</label>
                     <input type="text" name="phone" value={formData.phone} onChange={handleChange} required />
                 </div>
                 <div>
-                    <label>Endereço:</label>
-                    <input type="text" name="address" value={formData.address} onChange={handleChange} required />
+                    <label>Document:</label>
+                    <input type="text" name="document" value={formData.document} onChange={handleChange} required />
                 </div>
-                <button type="submit">Registrar</button>
+                <button type="submit">Register</button>
             </form>
         </div>
     );
