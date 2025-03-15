@@ -8,6 +8,7 @@ import UserRegister from './Paginas/Accommodation/UserRegister';
 import UserUpdate from './Paginas/Accommodation/UserUpdate';
 import SearchUser from './Paginas/Accommodation/SearchUser';
 import MainMenu from './Paginas/MainMenu/MainMenu';
+
 function App() {
   return (
     <Router>

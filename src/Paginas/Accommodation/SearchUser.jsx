@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styles from './SearchUser.css';  // Importando o módulo CSS
+import styles from './SearchUser.css';  
 
 const SearchUser = () => {
     const [searchType, setSearchType] = useState('');
@@ -8,7 +8,8 @@ const SearchUser = () => {
     const [error, setError] = useState('');
 
     const handleSearch = async () => {
-        setError('');
+        setError(''); // Clears any previous errors
+
         if (searchType === 'name' && !/^[a-zA-Z\sÀ-ÖØ-öø-ÿ]+$/.test(searchTerm)) {
             setError('Name should contain only letters, spaces, and accents.');
             return;
@@ -26,8 +27,21 @@ const SearchUser = () => {
             return;
         }
 
-        const results = await fetch(`/api/search?${searchType}=${searchTerm}`).then(res => res.json());
-        setSearchResults(results);
+        try {
+            
+            const response = await fetch(`http://localhost:5000/api/search?${searchType}=${searchTerm}`);
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const results = await response.json();
+
+            setSearchResults(results);
+        } catch (err) {
+            console.error('Error searching for clients:', err);
+            setError('Error searching for clients');
+        }
     };
 
     return (

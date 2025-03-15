@@ -1,19 +1,19 @@
 const bcrypt = require('bcrypt');
 
-// Função para gerar o hash da senha
-async function hashPassword(senha) {
-  const saltRounds = 10; // Número de rounds para gerar o salt
-  const hash = await bcrypt.hash(senha, saltRounds);
+// Function to generate the password hash
+async function hashPassword(password) {
+  const saltRounds = 10; // Number of rounds to generate the salt
+  const hash = await bcrypt.hash(password, saltRounds);
   return hash;
 }
 
-// Função para comparar a senha com o hash armazenado
-async function comparePassword(senha, hash) {
-  const match = await bcrypt.compare(senha, hash);
-  return match; // Retorna true se a senha corresponder ao hash
+// Function to compare the password with the stored hash
+async function comparePassword(password, hash) {
+  const match = await bcrypt.compare(password, hash);
+  return match; // Returns true if the password matches the hash
 }
 
-// Exporta as funções
+// Export functions
 module.exports = {
   hashPassword,
   comparePassword,

@@ -11,35 +11,25 @@ const UserRegister = () => {
         document: ''
     });
 
-    const [nextClientCode, setNextClientCode] = useState(null);
     const [loadingCode, setLoadingCode] = useState(false);
 
     useEffect(() => {
-        fetchNextClientCode();
+        generateClientCode();
     }, []);
 
-    // Fetch the next available client code from the backend
-    const fetchNextClientCode = async () => {
+    const generateClientCode = async () => {
         setLoadingCode(true);
         try {
+            // Chama o endpoint que retorna o próximo código do cliente
             const { data } = await axios.get('http://localhost:5000/clients/next-code');
-            setNextClientCode(data.nextClientCode);
-        } catch (error) {
-            console.error("Error fetching the next client code:", error);
-        } finally {
-            setLoadingCode(false);
-        }
-    };
-
-    // Insert the next available code into the form
-    const handleInsertClient = () => {
-        if (nextClientCode !== null) {
             setFormData((prevData) => ({
                 ...prevData,
-                client_code: nextClientCode
+                client_code: data.nextClientCode
             }));
-        } else {
-            alert("Code not loaded yet. Please wait a moment.");
+        } catch (error) {
+            console.error("Erro ao obter código do cliente:", error);
+        } finally {
+            setLoadingCode(false);
         }
     };
 
@@ -52,20 +42,22 @@ const UserRegister = () => {
         });
     };
 
-    // Submit form data to the backend
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.client_code) {
-            alert("Please click 'Insert New Client' to generate a code.");
+            alert("Erro ao gerar código do cliente. Tente novamente.");
             return;
         }
-
+    
         try {
+            // Envia os dados para o back-end
             await axios.post('http://localhost:5000/clients', formData);
-            alert("Client registered successfully!");
-
-            fetchNextClientCode();
-
+            alert("Cliente registrado com sucesso!");
+    
+            // Gera um novo código após o registro
+            generateClientCode();
+    
+            // Reseta o formulário
             setFormData({
                 client_code: '',
                 name: '',
@@ -74,24 +66,18 @@ const UserRegister = () => {
                 document: ''
             });
         } catch (error) {
-            console.error("Error registering client:", error);
-            alert("Error registering client.");
+            console.error("Erro ao registrar cliente:", error);
+            alert(error.response?.data?.error || "Erro ao registrar cliente.");
         }
     };
 
     return (
         <div className="container">
             <h2>Client Registration</h2>
-            <button 
-                className="insert-button" 
-                onClick={handleInsertClient} 
-                disabled={loadingCode || formData.client_code !== ''}>
-                {loadingCode ? "Loading Code..." : "Insert New Client"}
-            </button>
             <form onSubmit={handleSubmit}>
                 <div>
                     <label>Client Code:</label>
-                    <input type="text" name="clientCode" value={formData.client_code} readOnly />
+                    <input type="text" name="client_code" value={formData.client_code} readOnly />
                 </div>
                 <div>
                     <label>Name:</label>
@@ -109,7 +95,9 @@ const UserRegister = () => {
                     <label>Document:</label>
                     <input type="text" name="document" value={formData.document} onChange={handleChange} required />
                 </div>
-                <button type="submit">Register</button>
+                <button type="submit" disabled={loadingCode}>
+                    {loadingCode ? "Generating Code..." : "Register"}
+                </button>
             </form>
         </div>
     );

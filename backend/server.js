@@ -1,10 +1,10 @@
-require("dotenv").config();// Carrega as variáveis do arquivo .env
+require("dotenv").config(); // Load environment variables from .env file
 
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
 const { Pool } = require('pg');
-const { hashPassword, comparePassword } = require('./authUtils.js'); // Importa as funções
+const { hashPassword, comparePassword } = require('./authUtils.js'); // Import utility functions
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// Configuração do PostgreSQL
+// PostgreSQL Configuration
 const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -21,213 +21,237 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-// Rota de exemplo para testar o backend
+// Example route to test the backend
 app.get("/api/login", (req, res) => {
-  res.json({ message: "Backend do hotel funcionando!" });
+  res.json({ message: "Hotel backend is running!" });
 });
 
-// Rota para buscar dados de exemplo usando Axios
-app.get("/api/dados", async (req, res) => {
+// Route to fetch example data using Axios
+app.get("/api/data", async (req, res) => {
   try {
-    const resposta = await axios.get("https://jsonplaceholder.typicode.com/posts");
-    res.json(resposta.data);
+    const response = await axios.get("https://jsonplaceholder.typicode.com/posts");
+    res.json(response.data);
   } catch (error) {
-    res.status(500).json({ error: "Erro ao buscar dados" });
+    res.status(500).json({ error: "Error fetching data" });
   }
 });
 
-// Iniciar o servidor
+// Start server
 app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
 
-// Rota para cadastrar um usuário
-app.post('/api/usuarios', async (req, res) => {
-  const { email, senha, confirmarSenha } = req.body;
+// Route to register a user
+app.post('/api/users', async (req, res) => {
+  const { email, password, confirmPassword } = req.body;
 
-  // Validação do email
-  const validarEmail = (email) => {
+  // Email validation
+  const validateEmail = (email) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
   };
 
-  if (!validarEmail(email)) {
-    return res.status(400).json({ message: 'Insira um email válido' });
+  if (!validateEmail(email)) {
+    return res.status(400).json({ message: 'Please enter a valid email' });
   }
 
   try {
-    // Verifica se o email já está cadastrado
-    const usuarioExistente = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+    // Check if email is already registered
+    const existingUser = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
 
-    if (usuarioExistente.rows.length > 0) {
-      return res.status(400).json({ message: 'Email já cadastrado' });
+    if (existingUser.rows.length > 0) {
+      return res.status(400).json({ message: 'Email already registered' });
     }
 
-    // Validação da senha
-    const validarSenha = (senha) => {
-      return senha.length >= 8 && senha.length <= 16; // Verifica se a senha tem entre 8 e 16 caracteres
+    // Password validation
+    const validatePassword = (password) => {
+      return password.length >= 8 && password.length <= 16;
     };
 
-    if (!validarSenha(senha)) {
-      return res.status(400).json({ message: 'A senha deve ter entre 8 e 16 caracteres' });
+    if (!validatePassword(password)) {
+      return res.status(400).json({ message: 'Password must be between 8 and 16 characters' });
     }
 
-    // Verifica se as senhas coincidem
-    if (senha !== confirmarSenha) {
-      return res.status(400).json({ message: 'As senhas não coincidem' });
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: 'Passwords do not match' });
     }
 
-    // Gera o hash da senha
-    const senhaHash = await hashPassword(senha);
+    // Generate password hash
+    const hashedPassword = await hashPassword(password);
 
-    // Insere o usuário no banco de dados
+    // Insert user into the database
     const { rows } = await pool.query(
-      'INSERT INTO usuarios (email, senha) VALUES ($1, $2) RETURNING *',
-      [email, senhaHash]
+      'INSERT INTO users (email, password) VALUES ($1, $2) RETURNING *',
+      [email, hashedPassword]
     );
 
-    res.status(201).json({ message: 'Usuário cadastrado com sucesso', usuario: rows[0] });
+    res.status(201).json({ message: 'User successfully registered', user: rows[0] });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Erro ao cadastrar usuário' });
+    res.status(500).json({ message: 'Error registering user' });
   }
 });
 
-// Rota para fazer login
+// Route to log in
 app.post('/api/login', async (req, res) => {
-  const { email, senha } = req.body;
+  const { email, password } = req.body;
 
   try {
-    // Busca o usuário pelo email
-    const { rows } = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+    // Find user by email
+    const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
 
     if (rows.length === 0) {
-      return res.status(404).send('Usuário não encontrado');
+      return res.status(404).send('User not found');
     }
 
-    const usuario = rows[0];
+    const user = rows[0];
 
-    // Compara a senha fornecida com o hash armazenado
-    const senhaValida = await comparePassword(senha, usuario.senha);
+    // Compare provided password with stored hash
+    const validPassword = await comparePassword(password, user.password);
 
-    if (!senhaValida) {
-      return res.status(401).send('Senha incorreta');
+    if (!validPassword) {
+      return res.status(401).send('Incorrect password');
     }
 
-    // Se a senha estiver correta, retorna o usuário (ou um token JWT, por exemplo)
-    res.json({ message: 'Login bem-sucedido', usuario });
+    res.json({ message: 'Login successful', user });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Erro ao fazer login');
+    res.status(500).send('Error logging in');
   }
 });
 
-// Rota para buscar cliente por código
-app.get('/clientes/client_code', async (req, res) => {
+// Route to fetch client by code
+app.get('/clients/client_code', async (req, res) => {
   try {
       const { clientCode } = req.params;
-      const result = await pool.query('SELECT * FROM clientes WHERE client_code = $1', [clientCode]);
+      const result = await pool.query('SELECT * FROM clients WHERE client_code = $1', [clientCode]);
 
       if (result.rows.length === 0) {
-          return res.status(404).json({ message: "Cliente não encontrado" });
+          return res.status(404).json({ message: "Client not found" });
       }
 
       res.json(result.rows[0]);
   } catch (error) {
-      console.error("Erro ao buscar cliente:", error);
-      res.status(500).json({ message: "Erro no servidor" });
+      console.error("Error fetching client:", error);
+      res.status(500).json({ message: "Server error" });
   }
 });
 
-// Rota para buscar acompanhante por código
+// Route to fetch companion by code
 app.get('/companions/code', async (req, res) => {
   try {
       const { code } = req.params;
       const result = await pool.query('SELECT * FROM companions WHERE code = $1', [code]);
 
       if (result.rows.length === 0) {
-          return res.status(404).json({ message: "Acompanhante não encontrado" });
+          return res.status(404).json({ message: "Companion not found" });
       }
 
       res.json(result.rows[0]);
   } catch (error) {
-      console.error("Erro ao buscar acompanhante:", error);
-      res.status(500).json({ message: "Erro no servidor" });
+      console.error("Error fetching companion:", error);
+      res.status(500).json({ message: "Server error" });
   }
 });
 
-// Rota para fazer check-in
+
+// Route to handle check-in
 app.post('/checkin', (req, res) => {
-  console.log("Check-in recebido:", req.body);
-  res.status(201).json({ message: 'Check-in realizado com sucesso' });
+  console.log("Check-in received:", req.body);
+  res.status(201).json({ message: 'Check-in successful' });
 });
 
-app.get('/clientes/proximo-codigo', async (req, res) => {
-  try {
-      const result = await pool.query(`
-          SELECT COALESCE(MAX(client_code), 0) + 1 AS next_code FROM clientes
-      `);
-      
-      console.log("Próximo código de cliente:", result.rows[0].next_code);
-      res.json({ nextClientCode: result.rows[0].next_code });
-
-  } catch (error) {
-      console.error("Erro ao buscar próximo código de cliente:", error);
-      res.status(500).json({ message: "Erro no servidor", error: error.message });
-  }
-});
-
-app.post('/clientes', async (req, res) => {
-  try {
-      const { client_code, name, email, phone_number, address } = req.body;
-
-      await pool.query(
-          'INSERT INTO clientes (client_code, name, email, phone_number, address) VALUES ($1, $2, $3, $4, $5)',
-          [client_code, name, email, phone_number, address]
-      );
-
-      res.status(201).json({ message: "Cliente registrado com sucesso!" });
-  } catch (error) {
-      console.error("Erro ao registrar cliente:", error);
-      res.status(500).json({ message: "Erro no servidor" });
-  }
-});
-
-//teste
-app.get('/clientes/:clientCode', (req, res) => {
-  const fakeClient = {
-      name: "João Silva",
-      email: "joao.silva@email.com",
-      phone: "11999999999",
-      address: "Rua Exemplo, 123 - São Paulo, SP"
-  };
-
-  res.json(fakeClient);
-});
-
-//teste
-app.get('/reservas/:clientCode', (req, res) => {
-  const fakeReservation = {
-      client: {
-          name: "João Silva",
-          email: "joao.silva@email.com",
-          phone: "11999999999",
-          address: "Rua Exemplo, 123 - São Paulo, SP"
-      },
-      roomNumber: "305",
-      checkInDate: "2025-03-05",
-      companions: [
-          {
-              name: "Maria Oliveira",
-              email: "maria.oliveira@email.com"
-          }
-      ]
-  };
-
-  res.json(fakeReservation);
-});
-
+// Route to handle check-out
 app.post('/checkout', (req, res) => {
-  console.log("Check-Out realizado:", req.body);
-  res.json({ message: "Check-Out realizado com sucesso!" });
+  console.log("Check-Out completed:", req.body);
+  res.json({ message: "Check-Out successful!" });
+});
+
+//client register
+
+// Route to register a client
+app.post('/clients', async (req, res) => {
+  const { client_code, name, email, phone, document } = req.body;
+
+  // Validate the inputs
+  if (!name || !email || !document) {
+    return res.status(400).json({ error: 'Name, Email, and Document are required' });
+  }
+
+  try {
+    // Check if the email or document is already registered
+    const existingClient = await pool.query(
+      'SELECT * FROM clients WHERE email = $1 OR document = $2',
+      [email, document]
+    );
+
+    if (existingClient.rows.length > 0) {
+      return res.status(400).json({ error: 'Email or Document already registered' });
+    }
+
+    // Insert the new client into the database
+    const query = `
+      INSERT INTO clients (client_code, name, email, phone, document)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING *;
+    `;
+    const values = [client_code, name, email, phone, document];
+
+    const { rows } = await pool.query(query, values);
+    res.status(201).json({ message: 'Client registered successfully', client: rows[0] });
+  } catch (error) {
+    console.error('Error registering client:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Route to get the next client code
+app.get('/clients/next-code', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT MAX(client_code) AS max_code FROM clients');
+    const nextCode = result.rows[0].max_code ? result.rows[0].max_code + 1 : 1;
+    res.json({ nextClientCode: nextCode });
+  } catch (error) {
+    console.error('Error generating client code:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Route to search for clients
+app.get('/api/search', async (req, res) => {
+  try {
+      const { name, document, phone, email } = req.query;
+      let query = 'SELECT * FROM clients WHERE ';
+      let conditions = [];
+      let values = [];
+
+      if (name) {
+          conditions.push(`name ILIKE $${conditions.length + 1}`);
+          values.push(`%${name}%`);
+      }
+      if (document) {
+          conditions.push(`document = $${conditions.length + 1}`);
+          values.push(document);
+      }
+      if (phone) {
+          conditions.push(`phone = $${conditions.length + 1}`);
+          values.push(phone);
+      }
+      if (email) {
+          conditions.push(`email = $${conditions.length + 1}`);
+          values.push(email);
+      }
+
+      if (conditions.length === 0) {
+          return res.status(400).json({ error: 'No search criteria provided' });
+      }
+
+      query += conditions.join(' OR ');
+      const { rows } = await pool.query(query, values);
+      res.json(rows); // Certifique-se de que a resposta é um JSON
+  } catch (error) {
+      console.error('Error searching for clients:', error);
+      res.status(500).json({ error: 'Server error' });
+  }
 });
