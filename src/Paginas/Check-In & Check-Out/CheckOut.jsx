@@ -20,10 +20,10 @@ const CheckOut = () => {
     const handleClientCodeChange = async (e) => {
         const clientCode = e.target.value;
         setFormData({ ...formData, clientCode });
-
+    
         if (clientCode.length > 0) {
             try {
-                const { data } = await axios.get(`https://seu-backend.com/reservas/${clientCode}`);
+                const { data } = await axios.get(`http://localhost:5000/reservas/${clientCode}`); // 🛠 Confirme a URL aqui
                 
                 setFormData({
                     ...formData,
@@ -38,11 +38,10 @@ const CheckOut = () => {
                 });
             } catch (error) {
                 console.error("Erro ao buscar reserva:", error);
-                alert("Reserva não encontrada!");
+                alert("Reserva não encontrada! Verifique o código.");
             }
         }
     };
-
     // Submeter o Check-Out
     const handleSubmit = async (e) => {
         e.preventDefault();

@@ -192,3 +192,42 @@ app.post('/clientes', async (req, res) => {
       res.status(500).json({ message: "Erro no servidor" });
   }
 });
+
+//teste
+app.get('/clientes/:clientCode', (req, res) => {
+  const fakeClient = {
+      name: "João Silva",
+      email: "joao.silva@email.com",
+      phone: "11999999999",
+      address: "Rua Exemplo, 123 - São Paulo, SP"
+  };
+
+  res.json(fakeClient);
+});
+
+//teste
+app.get('/reservas/:clientCode', (req, res) => {
+  const fakeReservation = {
+      client: {
+          name: "João Silva",
+          email: "joao.silva@email.com",
+          phone: "11999999999",
+          address: "Rua Exemplo, 123 - São Paulo, SP"
+      },
+      roomNumber: "305",
+      checkInDate: "2025-03-05",
+      companions: [
+          {
+              name: "Maria Oliveira",
+              email: "maria.oliveira@email.com"
+          }
+      ]
+  };
+
+  res.json(fakeReservation);
+});
+
+app.post('/checkout', (req, res) => {
+  console.log("Check-Out realizado:", req.body);
+  res.json({ message: "Check-Out realizado com sucesso!" });
+});

@@ -4,6 +4,8 @@ import './Check.css';
 import { Link } from 'react-router-dom';
 
 const CheckIn = () => {
+
+    
     const [formData, setFormData] = useState({
         clientCode: '',
         name: '',
@@ -17,27 +19,30 @@ const CheckIn = () => {
     });
 
     const handleClientCodeChange = async (e) => {
-        const clientCode = e.target.value;
-        setFormData({ ...formData, clientCode });
-    
-        if (clientCode.length > 0) {
-            try {
-                const { data } = await axios.get(`http://localhost:5000/clientes/${clientCode}`);
-                
-                setFormData({
-                    ...formData,
-                    clientCode,
-                    name: data.name,
-                    email: data.email,
-                    phone: data.phone,
-                    address: data.address,
-                });
-            } catch (error) {
-                console.error("Erro ao buscar cliente:", error);
-                alert("Cliente não encontrado!");
-            }
+    const clientCode = e.target.value;
+    setFormData({ ...formData, clientCode });
+
+    if (clientCode.length > 0) {
+        try {
+            const { data } = await axios.get(`http://localhost:5000/reservas/${clientCode}`); // 🛠 Confirme a URL aqui
+            
+            setFormData({
+                ...formData,
+                clientCode,
+                name: data.client.name,
+                email: data.client.email,
+                phone: data.client.phone,
+                address: data.client.address,
+                roomNumber: data.roomNumber,
+                checkInDate: data.checkInDate,
+                companions: data.companions || []
+            });
+        } catch (error) {
+            console.error("Erro ao buscar reserva:", error);
+            alert("Reserva não encontrada! Verifique o código.");
         }
-    };
+    }
+};
     
     const handleCompanionCodeChange = async (index, e) => {
         const companionCode = e.target.value;
