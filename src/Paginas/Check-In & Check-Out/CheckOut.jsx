@@ -9,21 +9,21 @@ const CheckOut = () => {
         name: '',
         email: '',
         phone: '',
-        address: '',
+        document: '',
         roomNumber: '',
         checkInDate: '',
         checkOutDate: '',
         companions: []
     });
 
-    // Buscar cliente pelo código no back-end
+    // Fetch client reservation by code from the backend
     const handleClientCodeChange = async (e) => {
         const clientCode = e.target.value;
         setFormData({ ...formData, clientCode });
     
         if (clientCode.length > 0) {
             try {
-                const { data } = await axios.get(`http://localhost:5000/reservas/${clientCode}`); // 🛠 Confirme a URL aqui
+                const { data } = await axios.get(`https://your-backend.com/reservations/${clientCode}`);
                 
                 setFormData({
                     ...formData,
@@ -31,26 +31,27 @@ const CheckOut = () => {
                     name: data.client.name,
                     email: data.client.email,
                     phone: data.client.phone,
-                    address: data.client.address,
+                    document: data.client.document,
                     roomNumber: data.roomNumber,
                     checkInDate: data.checkInDate,
                     companions: data.companions || []
                 });
             } catch (error) {
-                console.error("Erro ao buscar reserva:", error);
-                alert("Reserva não encontrada! Verifique o código.");
+                console.error("Error fetching reservation:", error);
+                alert("Reservation not found!");
             }
         }
     };
-    // Submeter o Check-Out
+
+    // Submit Check-Out
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('https://seu-backend.com/checkout', { ...formData, checkOutDate: new Date().toISOString().split('T')[0] });
-            alert("Check-Out realizado com sucesso!");
+            await axios.post('https://your-backend.com/checkout', { ...formData, checkOutDate: new Date().toISOString().split('T')[0] });
+            alert("Check-Out successfully completed!");
         } catch (error) {
-            console.error("Erro ao fazer check-out:", error);
-            alert("Erro ao realizar check-out.");
+            console.error("Error during check-out:", error);
+            alert("Error completing check-out.");
         }
     };
 
@@ -59,7 +60,7 @@ const CheckOut = () => {
             <h1>Check-Out</h1>
             <form onSubmit={handleSubmit}>
                 <div>
-                    <label>Código do Cliente:</label>
+                    <label>Client Code:</label>
                     <input
                         type="text"
                         name="clientCode"
@@ -71,7 +72,7 @@ const CheckOut = () => {
                 {formData.name && (
                     <>
                         <div>
-                            <label>Nome:</label>
+                            <label>Name:</label>
                             <input type="text" value={formData.name} readOnly />
                         </div>
                         <div>
@@ -79,47 +80,47 @@ const CheckOut = () => {
                             <input type="email" value={formData.email} readOnly />
                         </div>
                         <div>
-                            <label>Telefone:</label>
+                            <label>Phone:</label>
                             <input type="text" value={formData.phone} readOnly />
                         </div>
                         <div>
-                            <label>Endereço:</label>
-                            <input type="text" value={formData.address} readOnly />
+                            <label>Document:</label>
+                            <input type="text" value={formData.document} readOnly />
                         </div>
                         <div>
-                            <label>Número do Quarto:</label>
+                            <label>Room Number:</label>
                             <input type="text" value={formData.roomNumber} readOnly />
                         </div>
                         <div>
-                            <label>Data de Check-In:</label>
+                            <label>Check-In Date:</label>
                             <input type="date" value={formData.checkInDate} readOnly />
                         </div>
                         <div>
-                            <label>Data de Check-Out:</label>
+                            <label>Check-Out Date:</label>
                             <input type="date" value={formData.checkOutDate || new Date().toISOString().split('T')[0]} readOnly />
                         </div>
                         {formData.companions.length > 0 && (
                             <div>
-                                <h3>Acompanhantes:</h3>
+                                <h3>Companions:</h3>
                                 {formData.companions.map((companion, index) => (
                                     <div key={index}>
                                         <div>
-                                            <label>Nome do Acompanhante {index + 1}:</label>
+                                            <label>Companion Name {index + 1}:</label>
                                             <input type="text" value={companion.name} readOnly />
                                         </div>
                                         <div>
-                                            <label>Email do Acompanhante {index + 1}:</label>
+                                            <label>Companion Email {index + 1}:</label>
                                             <input type="email" value={companion.email} readOnly />
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         )}
-                        <button type="submit">Confirmar Check-Out</button>
+                        <button type="submit">Confirm Check-Out</button>
                     </>
                 )}
             </form>
-            <Link to="/" className="back-button">Voltar</Link>
+            <Link to="/" className="back-button">Back</Link>
         </div>
     );
 };

@@ -16,13 +16,13 @@ const Login = () => {
         email: loginEmail,
         senha: loginSenha,
       });
-      setMensagem(`Login bem-sucedido: ${response.data.usuario.email}`);
+      setMensagem(`Successful login: ${response.data.usuario.email}`);
       navigate('/Inicio'); // Redireciona para a página de dashboard (ou outra página)
     } catch (error) {
       if (error.response && error.response.data.message) {
         setMensagem(error.response.data.message); // Exibe a mensagem de erro do backend
       } else {
-        setMensagem('Erro ao fazer login');
+        setMensagem('Error logging in');
       }
     }
   };
@@ -33,14 +33,13 @@ const Login = () => {
     
     // Verificação de campos obrigatórios
     if (!loginEmail || !loginSenha) {
-      alert('Por favor, preencha todos os campos.');
+      alert('Please fill in all fields.');
       return;
     }
 
     // Chama a função para realizar o login
     fazerLogin();
   };
-
 
   return (
     <div className="login-container">
@@ -59,7 +58,7 @@ const Login = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="loginSenha">Senha:</label>
+          <label htmlFor="loginSenha">Password:</label>
           <input
             type="password"
             id="loginSenha"
@@ -68,11 +67,11 @@ const Login = () => {
             required
           />
         </div>
-        <button className="Button" type="submit">Entrar</button>
+        <button className="Button" type="submit">Sign In</button>
       </form>
 
       <Link to="/recoverylogin" className="recover-button">
-          Esqueceu a senha? 
+        Forgot your password?
       </Link>
         
       {mensagem && <p>{mensagem}</p>}

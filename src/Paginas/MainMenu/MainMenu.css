@@ -1,0 +1,37 @@
+.main-menu {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.menu-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100px; /* Ajuste a largura conforme necessário */
+    height: 100px; /* Ajuste a altura conforme necessário */
+    padding: 15px;
+    margin: 10px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.menu-item:hover {
+    background-color: #0056b3;
+}
+
+.icon {
+    margin-bottom: 10px; /* Ajuste a margem conforme necessário */
+}
+
+.label {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}

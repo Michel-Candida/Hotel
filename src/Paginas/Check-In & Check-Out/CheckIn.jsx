@@ -11,7 +11,7 @@ const CheckIn = () => {
         name: '',
         email: '',
         phone: '',
-        address: '',
+        document: '',
         roomNumber: '',
         checkInDate: '',
         numberOfPeople: 1,
@@ -39,7 +39,7 @@ const CheckIn = () => {
             });
         } catch (error) {
             console.error("Erro ao buscar reserva:", error);
-            alert("Reserva não encontrada! Verifique o código.");
+            alert("Client not found!");
         }
     }
 };
@@ -61,7 +61,7 @@ const CheckIn = () => {
                 };
             } catch (error) {
                 console.error("Erro ao buscar acompanhante:", error);
-                alert("Acompanhante não encontrado!");
+                alert("Companion not found!");
             }
         }
     
@@ -82,10 +82,10 @@ const CheckIn = () => {
         e.preventDefault();
         try {
             await axios.post('http://localhost:5000/checkin', formData);
-            alert("Check-in realizado com sucesso!");
+            alert("Check-in successfully completed!");
         } catch (error) {
             console.error("Erro ao fazer check-in:", error);
-            alert("Erro ao realizar check-in.");
+            alert("Error completing check-in.");
         }
     };
 
@@ -94,7 +94,7 @@ const CheckIn = () => {
             <h1>Check-In</h1>
             <form onSubmit={handleSubmit}>
                 <div>
-                    <label>Código do Cliente:</label>
+                    <label>Client Code:</label>
                     <input
                         type="text"
                         name="clientCode"
@@ -106,7 +106,7 @@ const CheckIn = () => {
                 {formData.name && (
                     <>
                         <div>
-                            <label>Nome:</label>
+                            <label>Name:</label>
                             <input type="text" value={formData.name} readOnly />
                         </div>
                         <div>
@@ -114,15 +114,15 @@ const CheckIn = () => {
                             <input type="email" value={formData.email} readOnly />
                         </div>
                         <div>
-                            <label>Telefone:</label>
+                            <label>Phone:</label>
                             <input type="text" value={formData.phone} readOnly />
                         </div>
                         <div>
-                            <label>Endereço:</label>
-                            <input type="text" value={formData.address} readOnly />
+                            <label>Document:</label>
+                            <input type="text" value={formData.document} readOnly />
                         </div>
                         <div>
-                            <label>Número do Quarto:</label>
+                            <label>Room Number:</label>
                             <input
                                 type="text"
                                 name="roomNumber"
@@ -132,7 +132,7 @@ const CheckIn = () => {
                             />
                         </div>
                         <div>
-                            <label>Data de Check-In:</label>
+                            <label>Check-In Date:</label>
                             <input
                                 type="date"
                                 name="checkInDate"
@@ -143,12 +143,12 @@ const CheckIn = () => {
                         </div>
                         <div>
                             <button type="button" onClick={handleAddCompanion}>
-                                Adicionar Acompanhante
+                                Add Companion
                             </button>
                         </div>
                         {formData.companions.map((companion, index) => (
                             <div key={index}>
-                                <label>Código do Acompanhante {index + 1}:</label>
+                                <label>Companion Code {index + 1}:</label>
                                 <input
                                     type="text"
                                     name="code"
@@ -159,22 +159,22 @@ const CheckIn = () => {
                                 {companion.name && (
                                     <>
                                         <div>
-                                            <label>Nome do Acompanhante {index + 1}:</label>
+                                            <label>Companion Name {index + 1}:</label>
                                             <input type="text" value={companion.name} readOnly />
                                         </div>
                                         <div>
-                                            <label>Email do Acompanhante {index + 1}:</label>
+                                            <label>Companion Email {index + 1}:</label>
                                             <input type="email" value={companion.email} readOnly />
                                         </div>
                                     </>
                                 )}
                             </div>
                         ))}
-                        <button type="submit">Confirmar Check-In</button>
+                        <button type="submit">Confirm Check-In</button>
                     </>
                 )}
             </form>
-            <Link to="/" className="back-button">Voltar</Link>
+            <Link to="/" className="back-button">Back</Link>
         </div>
     );
 };

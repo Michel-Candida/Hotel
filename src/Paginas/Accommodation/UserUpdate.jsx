@@ -8,28 +8,28 @@ const UserUpdate = () => {
         name: '',
         email: '',
         phone: '',
-        address: ''
+        document: ''
     });
 
     const [loading, setLoading] = useState(false);
 
     const handleSearchClient = async () => {
         if (!formData.clientCode) {
-            alert("Digite um código de cliente.");
+            alert("Enter a client code.");
             return;
         }
 
         setLoading(true);
         try {
-            const { data } = await axios.get(`https://seu-backend.com/clientes/${formData.clientCode}`);
+            const { data } = await axios.get(`https://your-backend.com/clients/${formData.clientCode}`);
             if (data) {
                 setFormData(data);
             } else {
-                alert("Cliente não encontrado.");
+                alert("Client not found.");
             }
         } catch (error) {
-            console.error("Erro ao buscar cliente:", error);
-            alert("Erro ao buscar cliente.");
+            console.error("Error fetching client:", error);
+            alert("Error fetching client.");
         } finally {
             setLoading(false);
         }
@@ -46,37 +46,37 @@ const UserUpdate = () => {
     const handleUpdateClient = async (e) => {
         e.preventDefault();
         if (!formData.clientCode) {
-            alert("Busque um cliente primeiro.");
+            alert("Search for a client first.");
             return;
         }
 
         try {
-            await axios.put(`https://seu-backend.com/clientes/${formData.clientCode}`, formData);
-            alert("Cadastro atualizado com sucesso!");
+            await axios.put(`https://your-backend.com/clients/${formData.clientCode}`, formData);
+            alert("Client updated successfully!");
         } catch (error) {
-            console.error("Erro ao atualizar cliente:", error);
-            alert("Erro ao atualizar cliente.");
+            console.error("Error updating client:", error);
+            alert("Error updating client.");
         }
     };
 
     return (
         <div className="container">
-            <h2>Atualização de Cliente</h2>
+            <h2>Client Update</h2>
             <div className="client-search">
                 <input 
                     type="text" 
                     name="clientCode" 
                     value={formData.clientCode} 
                     onChange={handleChange} 
-                    placeholder="Digite o código do cliente"
+                    placeholder="Enter client code"
                 />
                 <button className="search-button" onClick={handleSearchClient} disabled={loading}>
-                    {loading ? "Buscando..." : "Buscar Cliente"}
+                    {loading ? "Searching..." : "Search Client"}
                 </button>
             </div>
             <form onSubmit={handleUpdateClient}>
                 <div>
-                    <label>Nome:</label>
+                    <label>Name:</label>
                     <input type="text" name="name" value={formData.name} onChange={handleChange} required />
                 </div>
                 <div>
@@ -84,14 +84,14 @@ const UserUpdate = () => {
                     <input type="email" name="email" value={formData.email} onChange={handleChange} required />
                 </div>
                 <div>
-                    <label>Telefone:</label>
+                    <label>Phone:</label>
                     <input type="text" name="phone" value={formData.phone} onChange={handleChange} required />
                 </div>
                 <div>
-                    <label>Endereço:</label>
-                    <input type="text" name="address" value={formData.address} onChange={handleChange} required />
+                    <label>Document:</label>
+                    <input type="text" name="document" value={formData.document} onChange={handleChange} required />
                 </div>
-                <button type="submit">Atualizar Cadastro</button>
+                <button type="submit">Update Client</button>
             </form>
         </div>
     );

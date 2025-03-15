@@ -8,16 +8,16 @@ const RecoveryLogin = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         // Aqui você pode adicionar a lógica para enviar o email de recuperação
-        console.log('Email para recuperação enviado para:', email);
+        console.log('Recovery email sent to:', email);
     };
 
     return (
         <div>
             <Link to="/" className="back-button">
-                Voltar
+                Back
             </Link>
 
-            <h2>Redefinir Senha</h2>
+            <h2>Reset Password</h2>
             
             <form onSubmit={handleSubmit}>
                 <label>
@@ -29,7 +29,7 @@ const RecoveryLogin = () => {
                         required
                     />
                 </label>
-                <button type="submit">Enviar</button>
+                <button type="submit">Send</button>
             </form>
         </div>
     );
