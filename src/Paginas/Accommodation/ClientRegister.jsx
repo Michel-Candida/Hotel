@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './UserRegister.css';
+import './ClientRegister.css';
 
-const UserRegister = () => {
+const ClientRegister = () => {
     const [formData, setFormData] = useState({
         client_code: '',
         name: '',
@@ -18,7 +18,6 @@ const UserRegister = () => {
         fetchNextClientCode();
     }, []);
 
-    // Fetch the next available client code from the backend
     const fetchNextClientCode = async () => {
         setLoadingCode(true);
         try {
@@ -31,7 +30,6 @@ const UserRegister = () => {
         }
     };
 
-    // Insert the next available code into the form
     const handleInsertClient = () => {
         if (nextClientCode !== null) {
             setFormData((prevData) => ({
@@ -43,7 +41,6 @@ const UserRegister = () => {
         }
     };
 
-    // Update form values
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -52,7 +49,6 @@ const UserRegister = () => {
         });
     };
 
-    // Submit form data to the backend
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.client_code) {
@@ -80,18 +76,18 @@ const UserRegister = () => {
     };
 
     return (
-        <div className="container">
-            <h2>Client Registration</h2>
+        <div className="user-register-container">
+            <h2 className="user-register-title">Client Registration</h2>
             <button 
-                className="insert-button" 
+                className="user-register-button" 
                 onClick={handleInsertClient} 
                 disabled={loadingCode || formData.client_code !== ''}>
                 {loadingCode ? "Loading Code..." : "Insert New Client"}
             </button>
-            <form onSubmit={handleSubmit}>
+            <form className="user-register-form" onSubmit={handleSubmit}>
                 <div>
                     <label>Client Code:</label>
-                    <input type="text" name="clientCode" value={formData.client_code} readOnly />
+                    <input type="text" name="client_code" value={formData.client_code} readOnly />
                 </div>
                 <div>
                     <label>Name:</label>
@@ -109,10 +105,10 @@ const UserRegister = () => {
                     <label>Document:</label>
                     <input type="text" name="document" value={formData.document} onChange={handleChange} required />
                 </div>
-                <button type="submit">Register</button>
+                <button className="user-register-button" type="submit">Register</button>
             </form>
         </div>
     );
 };
 
-export default UserRegister;
+export default ClientRegister;

@@ -12,7 +12,7 @@ const RecoveryLogin = () => {
     };
 
     return (
-        <div>
+        <div className="recovery-container">
             <Link to="/" className="back-button">
                 Back
             </Link>

@@ -1,4 +1,4 @@
-.container {
+.user-update-container {
     width: 100%;
     max-width: 600px;
     margin: 50px auto;
@@ -8,33 +8,43 @@
     border-radius: 8px;
 }
 
-h2 {
+.user-update-container h2 {
     text-align: center;
     color: #333;
 }
 
-.client-search {
+.user-update-search {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 20px;
 }
 
-.client-search input {
+.user-update-search input {
     flex: 1;
+    max-width: 300px;  /* Definindo uma largura máxima para o input */
 }
 
-.search-button {
+.user-update-search-button {
     background-color: #17a2b8;
     padding: 10px 15px;
     white-space: nowrap;
 }
 
-.search-button:hover {
+.user-update-search-button:hover {
     background-color: #138496;
 }
 
-button {
+.user-update-form input {
+    width: 100%;
+    max-width: 400px;  /* Definindo uma largura máxima para os inputs no formulário */
+    padding: 8px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.user-update-form button {
     padding: 10px;
     background-color: #007bff;
     color: #fff;
@@ -44,6 +54,6 @@ button {
     cursor: pointer;
 }
 
-button:hover {
+.user-update-form button:hover {
     background-color: #0056b3;
 }
