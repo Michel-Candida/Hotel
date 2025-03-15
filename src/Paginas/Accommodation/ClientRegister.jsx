@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './UserRegister.css';
+import './ClientRegister.css';
 
-const UserRegister = () => {
+const ClientRegister = () => {
     const [formData, setFormData] = useState({
         client_code: '',
         name: '',
@@ -20,7 +20,6 @@ const UserRegister = () => {
     const generateClientCode = async () => {
         setLoadingCode(true);
         try {
-            // Chama o endpoint que retorna o próximo código do cliente
             const { data } = await axios.get('http://localhost:5000/clients/next-code');
             setFormData((prevData) => ({
                 ...prevData,
@@ -33,7 +32,6 @@ const UserRegister = () => {
         }
     };
 
-    // Update form values
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -103,4 +101,4 @@ const UserRegister = () => {
     );
 };
 
-export default UserRegister;
+export default ClientRegister;

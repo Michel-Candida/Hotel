@@ -60,9 +60,9 @@ const UserUpdate = () => {
     };
 
     return (
-        <div className="container">
+        <div className="user-update-container">
             <h2>Client Update</h2>
-            <div className="client-search">
+            <div className="user-update-search">
                 <input 
                     type="text" 
                     name="clientCode" 
@@ -70,26 +70,54 @@ const UserUpdate = () => {
                     onChange={handleChange} 
                     placeholder="Enter client code"
                 />
-                <button className="search-button" onClick={handleSearchClient} disabled={loading}>
+                <button 
+                    className="user-update-search-button" 
+                    onClick={handleSearchClient} 
+                    disabled={loading}
+                >
                     {loading ? "Searching..." : "Search Client"}
                 </button>
             </div>
-            <form onSubmit={handleUpdateClient}>
+            <form className="user-update-form" onSubmit={handleUpdateClient}>
                 <div>
                     <label>Name:</label>
-                    <input type="text" name="name" value={formData.name} onChange={handleChange} required />
+                    <input 
+                        type="text" 
+                        name="name" 
+                        value={formData.name} 
+                        onChange={handleChange} 
+                        required 
+                    />
                 </div>
                 <div>
                     <label>Email:</label>
-                    <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+                    <input 
+                        type="email" 
+                        name="email" 
+                        value={formData.email} 
+                        onChange={handleChange} 
+                        required 
+                    />
                 </div>
                 <div>
                     <label>Phone:</label>
-                    <input type="text" name="phone" value={formData.phone} onChange={handleChange} required />
+                    <input 
+                        type="text" 
+                        name="phone" 
+                        value={formData.phone} 
+                        onChange={handleChange} 
+                        required 
+                    />
                 </div>
                 <div>
                     <label>Document:</label>
-                    <input type="text" name="document" value={formData.document} onChange={handleChange} required />
+                    <input 
+                        type="text" 
+                        name="document" 
+                        value={formData.document} 
+                        onChange={handleChange} 
+                        required 
+                    />
                 </div>
                 <button type="submit">Update Client</button>
             </form>

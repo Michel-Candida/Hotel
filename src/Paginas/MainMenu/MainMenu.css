@@ -2,8 +2,11 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    align-items: center;
     height: 100vh;
     background-color: #f8f9fa;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .menu-item {
@@ -11,27 +14,41 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 100px; /* Ajuste a largura conforme necessário */
-    height: 100px; /* Ajuste a altura conforme necessário */
+    width: 120px; /* Ajustada a largura para melhor responsividade */
+    height: 120px; /* Ajustada a altura para melhor responsividade */
     padding: 15px;
-    margin: 10px;
+    margin: 15px;
     background-color: #007bff;
     color: white;
-    border-radius: 5px;
+    border-radius: 10px; /* Cantos mais arredondados para um estilo mais suave */
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease; /* Transição suave para todas as mudanças de estilo */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra sutil para dar mais profundidade */
 }
 
 .menu-item:hover {
     background-color: #0056b3;
+    transform: translateY(-5px); /* Pequeno efeito de elevação ao passar o mouse */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Sombra mais forte no hover */
 }
 
 .icon {
-    margin-bottom: 10px; /* Ajuste a margem conforme necessário */
+    font-size: 30px; /* Aumentando o ícone para um visual mais impactante */
+    margin-bottom: 10px;
 }
 
 .label {
-    font-size: 18px;
-    font-weight: bold;
+    font-size: 16px; /* Tamanho de fonte mais adequado */
+    font-weight: 600; /* Peso da fonte um pouco mais leve que "bold", mas ainda forte */
     text-align: center;
+    text-transform: uppercase; /* Transformação para letras maiúsculas para dar mais impacto */
+    letter-spacing: 1px; /* Espaciamento de letras para um efeito de destaque */
+    margin-top: 5px; /* Pequeno espaçamento acima do texto */
+}
+
+@media (max-width: 768px) {
+    .menu-item {
+        width: 100px; /* Ajuste a largura para telas menores */
+        height: 100px; /* Ajuste a altura para telas menores */
+    }
 }

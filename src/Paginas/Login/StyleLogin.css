@@ -22,7 +22,6 @@ body {
     color: #333;
 }
 
-.login-container input,
 .login-container input {
     width: 100%;
     padding: 15px;
@@ -42,10 +41,12 @@ body {
     font-size: 18px;
     cursor: pointer;
     margin-top: 15px;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .Button:hover {
     background-color: #45a049;
+    color: white;
 }
 
 .login-container a {
@@ -53,10 +54,16 @@ body {
     margin-top: 15px;
     color: #4CAF50;
     text-decoration: none;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #4CAF50;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .login-container a:hover {
-    text-decoration: underline;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
 }
 
 .recover-button {
@@ -66,8 +73,10 @@ body {
     padding: 10px;
     border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .recover-button:hover {
     background-color: #f9f9f9;
+    color: #4CAF50;
 }
