@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styles from './SearchUser.css';  
+import './SearchUser.css';  
 
 const SearchUser = () => {
     const [searchType, setSearchType] = useState('');

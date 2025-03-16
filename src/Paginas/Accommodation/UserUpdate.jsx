@@ -3,8 +3,8 @@ import axios from 'axios';
 import './UserUpdate.css';
 
 const UserUpdate = () => {
+    const [clientCode, setClientCode] = useState('');
     const [formData, setFormData] = useState({
-        clientCode: '',
         name: '',
         email: '',
         phone: '',
@@ -13,49 +13,63 @@ const UserUpdate = () => {
 
     const [loading, setLoading] = useState(false);
 
+    // Função para buscar o cliente
     const handleSearchClient = async () => {
-        if (!formData.clientCode) {
-            alert("Enter a client code.");
+        if (!clientCode) {
+            alert("Please enter a client code.");
             return;
         }
 
         setLoading(true);
         try {
-            const { data } = await axios.get(`https://your-backend.com/clients/${formData.clientCode}`);
-            if (data) {
-                setFormData(data);
+            const { data } = await axios.get(`http://localhost:5000/clients/${clientCode}`);
+
+            if (data && Object.keys(data).length > 0) {
+                setFormData(prevState => ({
+                    ...prevState,
+                    ...data
+                }));
             } else {
                 alert("Client not found.");
             }
         } catch (error) {
             console.error("Error fetching client:", error);
-            alert("Error fetching client.");
+            alert("Error fetching client. Please try again.");
         } finally {
             setLoading(false);
         }
     };
 
+    // Função para lidar com alterações nos campos
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({
-            ...formData,
+        setFormData(prevState => ({
+            ...prevState,
             [name]: value
-        });
+        }));
     };
 
+    // Função para atualizar o cliente
     const handleUpdateClient = async (e) => {
         e.preventDefault();
-        if (!formData.clientCode) {
-            alert("Search for a client first.");
+
+        if (!clientCode) {
+            alert("Please search for a client first.");
             return;
         }
 
         try {
-            await axios.put(`https://your-backend.com/clients/${formData.clientCode}`, formData);
-            alert("Client updated successfully!");
+            const response = await axios.put(`http://localhost:5000/clients/${clientCode}`, formData);
+
+            // Verificar se a atualização foi bem-sucedida
+            if (response.status === 200) {
+                alert("Client updated successfully!");
+            } else {
+                alert("Unexpected response from the server.");
+            }
         } catch (error) {
             console.error("Error updating client:", error);
-            alert("Error updating client.");
+            alert("Error updating client. Please check the data and try again.");
         }
     };
 
@@ -65,9 +79,8 @@ const UserUpdate = () => {
             <div className="user-update-search">
                 <input 
                     type="text" 
-                    name="clientCode" 
-                    value={formData.clientCode} 
-                    onChange={handleChange} 
+                    value={clientCode} 
+                    onChange={(e) => setClientCode(e.target.value)} 
                     placeholder="Enter client code"
                 />
                 <button 

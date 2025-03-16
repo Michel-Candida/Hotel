@@ -1,90 +1,145 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import './Check.css';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import axios from "axios";
+import "./Check.css";
+import { Link } from "react-router-dom";
 
 const CheckIn = () => {
-
-    
     const [formData, setFormData] = useState({
-        clientCode: '',
-        name: '',
-        email: '',
-        phone: '',
-        document: '',
-        roomNumber: '',
-        checkInDate: '',
+        clientCode: "",
+        name: "",
+        email: "",
+        phone: "",
+        document: "",
+        roomNumber: "",
+        checkInDate: "",
+        checkOutDate: "",
         numberOfPeople: 1,
-        companions: []
+        companions: [],
     });
 
-    const handleClientCodeChange = async (e) => {
-    const clientCode = e.target.value;
-    setFormData({ ...formData, clientCode });
+    const [isRoomAvailable, setIsRoomAvailable] = useState(true);
 
-    if (clientCode.length > 0) {
-        try {
-            const { data } = await axios.get(`http://localhost:5000/reservas/${clientCode}`); // 🛠 Confirme a URL aqui
-            
-            setFormData({
-                ...formData,
-                clientCode,
-                name: data.client.name,
-                email: data.client.email,
-                phone: data.client.phone,
-                address: data.client.address,
-                roomNumber: data.roomNumber,
-                checkInDate: data.checkInDate,
-                companions: data.companions || []
-            });
-        } catch (error) {
-            console.error("Erro ao buscar reserva:", error);
-            alert("Client not found!");
-        }
-    }
-};
-    
-    const handleCompanionCodeChange = async (index, e) => {
-        const companionCode = e.target.value;
-        const companions = [...formData.companions];
-    
-        companions[index] = { ...companions[index], code: companionCode };
-    
-        if (companionCode.length > 0) {
+    const handleClientCodeChange = async (e) => {
+        const clientCode = e.target.value;
+        setFormData((prevState) => ({ ...prevState, clientCode }));
+
+        if (clientCode.trim().length > 0) {
             try {
-                const { data } = await axios.get(`http://localhost:5000/companions/${companionCode}`);
-                
-                companions[index] = {
-                    ...companions[index],
-                    name: data.name,
-                    email: data.email
-                };
+                const { data } = await axios.get(
+                    `http://localhost:5000/clients/${clientCode}`
+                );
+                if (data) {
+                    setFormData((prevState) => ({
+                        ...prevState,
+                        name: data.name || "",
+                        email: data.email || "",
+                        phone: data.phone || "",
+                        document: data.document || "",
+                        checkInDate: "",
+                        checkOutDate: "",
+                        roomNumber: "",
+                        companions: [],
+                    }));
+                } else {
+                    alert("Client not found!");
+                }
             } catch (error) {
-                console.error("Erro ao buscar acompanhante:", error);
-                alert("Companion not found!");
+                console.error("Error fetching client data:", error);
+                alert("Error fetching client data.");
             }
         }
+    };
+
+    const checkRoomAvailability = async (roomNumber, checkInDate) => {
+        if (!roomNumber || !checkInDate) return;
     
-        setFormData({ ...formData, companions });
+        setIsRoomAvailable(false); // Desabilita o botão enquanto a verificação está em andamento.
+    
+        try {
+            const response = await axios.get(
+                "http://localhost:5000/check-room-availability",
+                {
+                    params: { room_number: roomNumber, checkin_date: checkInDate },
+                }
+            );
+    
+            setIsRoomAvailable(response.data.available); // Atualiza a disponibilidade
+    
+            if (!response.data.available) {
+                alert("The selected room is already occupied on this date!");
+            }
+        } catch (error) {
+            console.error("Error checking room availability:", error);
+            alert("Error checking availability.");
+        }
+    };
+    
+    const handleRoomNumberChange = (e) => {
+        const roomNumber = e.target.value;
+        setFormData((prevState) => ({ ...prevState, roomNumber }));
+    
+        if (formData.checkInDate) {
+            checkRoomAvailability(roomNumber, formData.checkInDate);
+        }
+    };
+    
+    const handleCheckInDateChange = (e) => {
+        const checkInDate = e.target.value;
+        setFormData((prevState) => ({ ...prevState, checkInDate }));
+    
+        if (formData.roomNumber) {
+            checkRoomAvailability(formData.roomNumber, checkInDate);
+        }
+    }
+
+    const handleCheckOutDateChange = (e) => {
+        setFormData((prevState) => ({ ...prevState, checkOutDate: e.target.value }));
     };
 
-    // Adicionar um novo acompanhante
     const handleAddCompanion = () => {
-        setFormData({
-            ...formData,
-            numberOfPeople: formData.numberOfPeople + 1,
-            companions: [...formData.companions, { code: '', name: '', email: '' }]
-        });
+        setFormData((prevState) => ({
+            ...prevState,
+            numberOfPeople: prevState.numberOfPeople + 1,
+            companions: [
+                ...prevState.companions,
+                { name: "", phone: "", document: "" },
+            ],
+        }));
     };
 
-    // Submeter o formulário
+    const handleRemoveCompanion = () => {
+        if (formData.companions.length > 0) {
+            const updatedCompanions = [...formData.companions];
+            updatedCompanions.pop(); 
+
+            setFormData((prevState) => ({
+                ...prevState,
+                numberOfPeople: prevState.numberOfPeople - 1,
+                companions: updatedCompanions,
+            }));
+        }
+    };
+
+    const handleCompanionChange = (index, e) => {
+        const { name, value } = e.target;
+        const updatedCompanions = [...formData.companions];
+        updatedCompanions[index] = { ...updatedCompanions[index], [name]: value };
+        setFormData({ ...formData, companions: updatedCompanions });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!isRoomAvailable) {
+            alert("The selected room is occupied. Please choose another.");
+            return;
+        }
+
         try {
-            await axios.post('http://localhost:5000/checkin', formData);
+            await axios.post("http://localhost:5000/checkin", formData);
             alert("Check-in successfully completed!");
         } catch (error) {
-            console.error("Erro ao fazer check-in:", error);
+            console.error("Error completing check-in:", error);
             alert("Error completing check-in.");
         }
     };
@@ -103,6 +158,7 @@ const CheckIn = () => {
                         required
                     />
                 </div>
+
                 {formData.name && (
                     <>
                         <div>
@@ -121,60 +177,102 @@ const CheckIn = () => {
                             <label>Document:</label>
                             <input type="text" value={formData.document} readOnly />
                         </div>
+                    </>
+                )}
+
+                {formData.name && (
+                    <>
                         <div>
                             <label>Room Number:</label>
                             <input
                                 type="text"
                                 name="roomNumber"
                                 value={formData.roomNumber}
-                                onChange={(e) => setFormData({ ...formData, roomNumber: e.target.value })}
+                                onChange={handleRoomNumberChange}
                                 required
                             />
                         </div>
+
                         <div>
                             <label>Check-In Date:</label>
                             <input
                                 type="date"
                                 name="checkInDate"
                                 value={formData.checkInDate}
-                                onChange={(e) => setFormData({ ...formData, checkInDate: e.target.value })}
+                                onChange={handleCheckInDateChange}
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label>Check-Out Date:</label>
+                            <input
+                                type="date"
+                                name="checkOutDate"
+                                value={formData.checkOutDate}
+                                onChange={handleCheckOutDateChange}
+                                required
+                            />
+                        </div>
+                    </>
+                )}
+
+                <div>
+                    <button type="button" onClick={handleAddCompanion}>
+                        Add Companion
+                    </button>
+                    <button type="button" onClick={handleRemoveCompanion} disabled={formData.companions.length === 0}>
+                        Remove Companion
+                    </button>
+                </div>
+
+                {formData.companions.map((companion, index) => (
+                    <div key={index}>
+                        <div>
+                            <label>Companion Name {index + 1}:</label>
+                            <input
+                                type="text"
+                                name="name"
+                                value={companion.name}
+                                onChange={(e) => handleCompanionChange(index, e)}
                                 required
                             />
                         </div>
                         <div>
-                            <button type="button" onClick={handleAddCompanion}>
-                                Add Companion
-                            </button>
+                            <label>Companion Phone {index + 1}:</label>
+                            <input
+                                type="text"
+                                name="phone"
+                                value={companion.phone}
+                                onChange={(e) => handleCompanionChange(index, e)}
+                                required
+                            />
                         </div>
-                        {formData.companions.map((companion, index) => (
-                            <div key={index}>
-                                <label>Companion Code {index + 1}:</label>
-                                <input
-                                    type="text"
-                                    name="code"
-                                    value={companion.code}
-                                    onChange={(e) => handleCompanionCodeChange(index, e)}
-                                    required
-                                />
-                                {companion.name && (
-                                    <>
-                                        <div>
-                                            <label>Companion Name {index + 1}:</label>
-                                            <input type="text" value={companion.name} readOnly />
-                                        </div>
-                                        <div>
-                                            <label>Companion Email {index + 1}:</label>
-                                            <input type="email" value={companion.email} readOnly />
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        ))}
-                        <button type="submit">Confirm Check-In</button>
-                    </>
-                )}
+                        <div>
+                            <label>Companion Document {index + 1}:</label>
+                            <input
+                                type="text"
+                                name="document"
+                                value={companion.document}
+                                onChange={(e) => handleCompanionChange(index, e)}
+                                required
+                            />
+                        </div>
+                    </div>
+                ))}
+
+                <button
+                    className="cheking-button"
+                    type="submit"
+                    disabled={!isRoomAvailable || !formData.checkInDate || !formData.roomNumber}
+                >
+                    Confirm Check-In
+                </button>
             </form>
-            <Link to="/" className="back-button">Back</Link>
+
+            <Link to="/MainMenu" className="back-button">
+                Back
+            </Link>
         </div>
     );
 };

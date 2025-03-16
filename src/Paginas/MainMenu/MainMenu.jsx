@@ -5,9 +5,9 @@ import './MainMenu.css'; // You can create a CSS file for styling
 const MainMenu = () => {
     const menuItems = [
         { name: 'Login', path: '/' },
-        { name: 'User Update', path: '/UserUpdate' },
-        { name: 'User Register', path: '/ClientRegister' },
-        { name: 'Search User', path: '/SearchUser' },
+        { name: 'Client Register', path: '/ClientRegister' },
+        { name: 'Update Client', path: '/UserUpdate' },
+        { name: 'Client Search', path: '/SearchUser' },
         { name: 'Check In', path: '/CheckIn' },
         { name: 'Check Out', path: '/CheckOut' },
     ];
