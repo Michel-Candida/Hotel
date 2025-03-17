@@ -1,10 +1,10 @@
-require("dotenv").config(); // Load environment variables from .env file
+require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
-const { Pool } = require('pg');
-const { hashPassword, comparePassword } = require('./authUtils.js'); // Import utility functions
+const { Pool } = require("pg");
+// const { hashPassword, comparePassword } = require("./authUtils.js");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -12,7 +12,6 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// PostgreSQL Configuration
 const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -21,237 +20,236 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-// Example route to test the backend
-app.get("/api/login", (req, res) => {
-  res.json({ message: "Hotel backend is running!" });
-});
+app.get("/api/status", (req, res) => res.json({ message: "Hotel backend is running!" }));
 
-// Route to fetch example data using Axios
+// Fetch example data
 app.get("/api/data", async (req, res) => {
   try {
-    const response = await axios.get("https://jsonplaceholder.typicode.com/posts");
-    res.json(response.data);
+    const { data } = await axios.get("https://jsonplaceholder.typicode.com/posts");
+    res.json(data);
   } catch (error) {
     res.status(500).json({ error: "Error fetching data" });
   }
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Client Routes
+app.get("/clients/:clientCode", async (req, res) => {
+  try {
+    const { clientCode } = req.params;
+    const { rows } = await pool.query("SELECT * FROM clients WHERE client_code = $1", [clientCode]);
+    if (!rows.length) return res.status(404).json({ message: "Client not found" });
+    res.json(rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
-// Route to register a user
-app.post('/api/users', async (req, res) => {
-  const { email, password, confirmPassword } = req.body;
-
-  // Email validation
-  const validateEmail = (email) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  };
-
-  if (!validateEmail(email)) {
-    return res.status(400).json({ message: 'Please enter a valid email' });
-  }
+// Route to update client
+app.put("/clients/:clientCode", async (req, res) => {
+  const { clientCode } = req.params;
+  const { name, email, phone, document } = req.body;
 
   try {
-    // Check if email is already registered
-    const existingUser = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-
-    if (existingUser.rows.length > 0) {
-      return res.status(400).json({ message: 'Email already registered' });
-    }
-
-    // Password validation
-    const validatePassword = (password) => {
-      return password.length >= 8 && password.length <= 16;
-    };
-
-    if (!validatePassword(password)) {
-      return res.status(400).json({ message: 'Password must be between 8 and 16 characters' });
-    }
-
-    // Check if passwords match
-    if (password !== confirmPassword) {
-      return res.status(400).json({ message: 'Passwords do not match' });
-    }
-
-    // Generate password hash
-    const hashedPassword = await hashPassword(password);
-
-    // Insert user into the database
-    const { rows } = await pool.query(
-      'INSERT INTO users (email, password) VALUES ($1, $2) RETURNING *',
-      [email, hashedPassword]
+    const { rows: existingClient } = await pool.query(
+      "SELECT * FROM clients WHERE client_code = $1",
+      [clientCode]
     );
 
-    res.status(201).json({ message: 'User successfully registered', user: rows[0] });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Error registering user' });
-  }
-});
-
-// Route to log in
-app.post('/api/login', async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    // Find user by email
-    const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-
-    if (rows.length === 0) {
-      return res.status(404).send('User not found');
+    if (existingClient.length === 0) {
+      return res.status(404).json({ message: "Client not found" });
     }
 
-    const user = rows[0];
+    const { rows } = await pool.query(
+      "UPDATE clients SET name = $1, email = $2, phone = $3, document = $4 WHERE client_code = $5 RETURNING *",
+      [name, email, phone, document, clientCode]
+    );
 
-    // Compare provided password with stored hash
-    const validPassword = await comparePassword(password, user.password);
+    res.status(200).json({ message: "Client updated successfully", client: rows[0] });
+  } catch (error) {
+    console.error("Error updating client:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
-    if (!validPassword) {
-      return res.status(401).send('Incorrect password');
+// Route to register clients
+app.post("/clients", async (req, res) => {
+  const { name, email, phone, document } = req.body;
+  
+  try {
+    // Verificar se o email já existe
+    const { rows: emailCheck } = await pool.query(
+      "SELECT * FROM clients WHERE email = $1",
+      [email]
+    );
+    
+    // Verificar se o documento já existe
+    const { rows: documentCheck } = await pool.query(
+      "SELECT * FROM clients WHERE document = $1",
+      [document]
+    );
+    
+    // Se ambos já existem, retornar erro específico
+    if (emailCheck.length && documentCheck.length) {
+      return res.status(400).json({ message: "Email and Document already exist" });
+    }
+    
+    // Se apenas o email já existe
+    if (emailCheck.length) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+    
+    // Se apenas o documento já existe
+    if (documentCheck.length) {
+      return res.status(400).json({ message: "Document already exists" });
+    }
+    
+    // Inserir o novo cliente no banco de dados
+    const { rows } = await pool.query(
+      "INSERT INTO clients (name, email, phone, document) VALUES ($1, $2, $3, $4) RETURNING client_code, name, email, phone, document",
+      [name, email, phone, document]
+    );
+    
+    res.status(201).json({ message: "Client registered successfully", client: rows[0] });
+  } catch (error) {
+    console.error('Server error:', error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Search Clients
+app.get("/api/search", async (req, res) => {
+  const filters = ["name", "document", "phone", "email"];
+  const conditions = [];
+  const values = [];
+  filters.forEach((filter) => {
+    if (req.query[filter]) {
+      conditions.push(`${filter} ILIKE $${conditions.length + 1}`);
+      values.push(`%${req.query[filter]}%`);
+    }
+  });
+  if (!conditions.length) return res.status(400).json({ error: "No search criteria provided" });
+  try {
+    const { rows } = await pool.query(`SELECT * FROM clients WHERE ${conditions.join(" OR ")}`, values);
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Route to fetch a reservation by client code
+app.get("/reservas/:clientCode", async (req, res) => {
+  try {
+    const { clientCode } = req.params;
+
+    // Buscar a reserva do cliente
+    const { rows: checkinRows } = await pool.query(
+      "SELECT * FROM checkins WHERE client_code = $1 ORDER BY checkin_date DESC LIMIT 1",
+      [clientCode]
+    );
+    if (checkinRows.length === 0) {
+      return res.status(404).json({ message: "Reservation not found" });
     }
 
-    res.json({ message: 'Login successful', user });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error logging in');
-  }
-});
+    const checkinData = checkinRows[0];
+    // Buscar os acompanhantes do cliente
+    const { rows: companionsRows } = await pool.query(
+      "SELECT * FROM companions WHERE checkin_id = $1",
+      [checkinData.checkin_id]
+    );
 
-// Route to fetch client by code
-app.get('/clients/client_code', async (req, res) => {
-  try {
-      const { clientCode } = req.params;
-      const result = await pool.query('SELECT * FROM clients WHERE client_code = $1', [clientCode]);
-
-      if (result.rows.length === 0) {
-          return res.status(404).json({ message: "Client not found" });
-      }
-
-      res.json(result.rows[0]);
+    res.json({
+      checkinData,
+      companions: companionsRows,
+    });
   } catch (error) {
-      console.error("Error fetching client:", error);
-      res.status(500).json({ message: "Server error" });
+    console.error("Error fetching reservation:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
-
-// Route to fetch companion by code
-app.get('/companions/code', async (req, res) => {
-  try {
-      const { code } = req.params;
-      const result = await pool.query('SELECT * FROM companions WHERE code = $1', [code]);
-
-      if (result.rows.length === 0) {
-          return res.status(404).json({ message: "Companion not found" });
-      }
-
-      res.json(result.rows[0]);
-  } catch (error) {
-      console.error("Error fetching companion:", error);
-      res.status(500).json({ message: "Server error" });
-  }
-});
-
 
 // Route to handle check-in
-app.post('/checkin', (req, res) => {
-  console.log("Check-in received:", req.body);
-  res.status(201).json({ message: 'Check-in successful' });
-});
-
-// Route to handle check-out
-app.post('/checkout', (req, res) => {
-  console.log("Check-Out completed:", req.body);
-  res.json({ message: "Check-Out successful!" });
-});
-
-//client register
-
-// Route to register a client
-app.post('/clients', async (req, res) => {
-  const { client_code, name, email, phone, document } = req.body;
-
-  // Validate the inputs
-  if (!name || !email || !document) {
-    return res.status(400).json({ error: 'Name, Email, and Document are required' });
-  }
+app.post("/checkin", async (req, res) => {
+  const { clientCode, roomNumber, checkInDate, checkOutDate, numberOfPeople, companions } = req.body;
 
   try {
-    // Check if the email or document is already registered
-    const existingClient = await pool.query(
-      'SELECT * FROM clients WHERE email = $1 OR document = $2',
-      [email, document]
+    // Verificar se o cliente existe
+    const { rows: clientRows } = await pool.query(
+      "SELECT * FROM clients WHERE client_code = $1",
+      [clientCode]
     );
-
-    if (existingClient.rows.length > 0) {
-      return res.status(400).json({ error: 'Email or Document already registered' });
+    if (clientRows.length === 0) {
+      return res.status(404).json({ message: "Client not found" });
     }
 
-    // Insert the new client into the database
-    const query = `
-      INSERT INTO clients (client_code, name, email, phone, document)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING *;
-    `;
-    const values = [client_code, name, email, phone, document];
+    // Inserir o check-in no banco de dados
+    const { rows: checkInRows } = await pool.query(
+      "INSERT INTO checkins (client_code, room_number, checkin_date, checkout_date, number_of_people) VALUES ($1, $2, $3, $4, $5) RETURNING checkin_id",
+      [clientCode, roomNumber, checkInDate, checkOutDate, numberOfPeople]
+    );
 
-    const { rows } = await pool.query(query, values);
-    res.status(201).json({ message: 'Client registered successfully', client: rows[0] });
+    const checkinId = checkInRows[0].checkin_id;
+
+    // Inserir os acompanhantes, se houver
+    for (const companion of companions) {
+      await pool.query(
+        "INSERT INTO companions (client_code, name, phone, document) VALUES ($1, $2, $3, $4)",
+        [clientCode, companion.name, companion.phone, companion.document]
+      );
+    }
+
+    res.status(200).json({ message: "Check-in and companions added successfully!" });
   } catch (error) {
-    console.error('Error registering client:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error during check-in:", error);
+    res.status(500).json({ message: "Server error during check-in" });
   }
 });
 
-// Route to get the next client code
-app.get('/clients/next-code', async (req, res) => {
+// Room availability validation for check-in
+app.get("/check-room-availability", async (req, res) => {
+  const { room_number, checkin_date } = req.query;
+
+  if (!room_number || !checkin_date) {
+    return res.status(400).json({ message: "Room number and check-in date are required" });
+  }
+
   try {
-    const result = await pool.query('SELECT MAX(client_code) AS max_code FROM clients');
-    const nextCode = result.rows[0].max_code ? result.rows[0].max_code + 1 : 1;
-    res.json({ nextClientCode: nextCode });
+    const { rows } = await pool.query(
+      "SELECT COUNT(*) AS ocupacoes FROM checkins WHERE room_number = $1 AND checkin_date = $2",
+      [room_number, checkin_date]
+    );
+
+    const isAvailable = parseInt(rows[0].ocupacoes) === 0; // Converte para inteiro
+
+    res.json({ available: isAvailable });
   } catch (error) {
-    console.error('Error generating client code:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error checking room availability:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-// Route to search for clients
-app.get('/api/search', async (req, res) => {
-  try {
-      const { name, document, phone, email } = req.query;
-      let query = 'SELECT * FROM clients WHERE ';
-      let conditions = [];
-      let values = [];
+// Start server
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-      if (name) {
-          conditions.push(`name ILIKE $${conditions.length + 1}`);
-          values.push(`%${name}%`);
-      }
-      if (document) {
-          conditions.push(`document = $${conditions.length + 1}`);
-          values.push(document);
-      }
-      if (phone) {
-          conditions.push(`phone = $${conditions.length + 1}`);
-          values.push(phone);
-      }
-      if (email) {
-          conditions.push(`email = $${conditions.length + 1}`);
-          values.push(email);
-      }
+// // Function to generate a unique client code
+// const generateUniqueClientCode = async () => {
+//   const generateCode = () => {
+//     return 'C' + Math.random().toString(36).substr(2, 9).toUpperCase(); // Generate a random code in the format 'CXXXXXXXXX'
+//   };
 
-      if (conditions.length === 0) {
-          return res.status(400).json({ error: 'No search criteria provided' });
-      }
+//   let clientCode = generateCode();
+//   let isUnique = false;
 
-      query += conditions.join(' OR ');
-      const { rows } = await pool.query(query, values);
-      res.json(rows); // Certifique-se de que a resposta é um JSON
-  } catch (error) {
-      console.error('Error searching for clients:', error);
-      res.status(500).json({ error: 'Server error' });
-  }
-});
+//   // Check if the generated code already exists in the database
+//   while (!isUnique) {
+//     const { rows } = await pool.query("SELECT * FROM clients WHERE client_code = $1", [clientCode]);
+//     if (rows.length === 0) {
+//       isUnique = true; // Unique code found
+//     } else {
+//       clientCode = generateCode(); // Generate a new code if the previous one already exists
+//     }
+//   }
+
+//   return clientCode;
+// };
