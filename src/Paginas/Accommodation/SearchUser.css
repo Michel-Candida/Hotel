@@ -19,7 +19,7 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     text-align: center;
-    min-height: 320px; /* Definindo um tamanho fixo para manter a estrutura */
+    min-height: 320px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -32,11 +32,19 @@
 
 .search-user-select,
 .search-user-input {
-    width: calc(100% - 22px);
+    width: calc(100% - 22px); /* Ajuste da largura */
     padding: 10px;
     margin: 10px 0;
     border: 1px solid #ccc;
     border-radius: 4px;
+}
+
+.search-user-select {
+    margin-bottom: 10px; /* Espaçamento extra abaixo do select */
+}
+
+.search-user-input {
+    margin-top: 10px; /* Espaçamento extra acima do input */
 }
 
 .search-user-button {
@@ -56,8 +64,8 @@
 .search-user-error {
     color: red;
     text-align: center;
-    margin-top: 10px;/* Definindo um tamanho fixo para manter a estrutura */
-    height: 30px; /* Definindo uma altura fixa para evitar variações */
+    margin-top: 10px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;

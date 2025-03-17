@@ -8,6 +8,9 @@ import ClientRegister from './Paginas/Accommodation/ClientRegister';
 import UserUpdate from './Paginas/Accommodation/UserUpdate';
 import SearchUser from './Paginas/Accommodation/SearchUser';
 import MainMenu from './Paginas/MainMenu/MainMenu';
+import RoomRegistration from './Paginas/Accommodation/RoomRegistration';
+import RoomUpdate from './Paginas/Accommodation/RoomUpdate';
+import Dashboard from './Paginas/Accommodation/Dashboard';  // Alterei aqui
 
 function App() {
   return (
@@ -21,8 +24,11 @@ function App() {
         <Route path="/UserUpdate" element={<UserUpdate/>}/>
         <Route path="/SearchUser" element={<SearchUser/>}/>
         <Route path="/MainMenu" element={<MainMenu/>}/>
+        <Route path="/RoomRegistration" element={<RoomRegistration/>}/>
+        <Route path="/RoomUpdate" element={<RoomUpdate/>}/>
+        <Route path="/Dashboard" element={<Dashboard/>}/>
       </Routes>
-      </Router>
+    </Router>
   );
 }
 
