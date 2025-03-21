@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './Check.css';
 import { Link } from 'react-router-dom';
+import './checkout.css';
 
 const CheckOut = () => {
     const [formData, setFormData] = useState({
@@ -16,15 +16,13 @@ const CheckOut = () => {
         companions: []
     });
 
-    // Fetch client reservation by code from the backend
     const handleClientCodeChange = async (e) => {
         const clientCode = e.target.value;
         setFormData({ ...formData, clientCode });
-    
+
         if (clientCode.length > 0) {
             try {
                 const { data } = await axios.get(`https://your-backend.com/reservations/${clientCode}`);
-                
                 setFormData({
                     ...formData,
                     clientCode,
@@ -43,7 +41,6 @@ const CheckOut = () => {
         }
     };
 
-    // Submit Check-Out
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -56,9 +53,9 @@ const CheckOut = () => {
     };
 
     return (
-        <div>
+        <div className="checkout-container">
             <h1>Check-Out</h1>
-            <form onSubmit={handleSubmit}>
+            <form className="checkout-form" onSubmit={handleSubmit}>
                 <div>
                     <label>Client Code:</label>
                     <input
@@ -100,7 +97,7 @@ const CheckOut = () => {
                             <input type="date" value={formData.checkOutDate || new Date().toISOString().split('T')[0]} readOnly />
                         </div>
                         {formData.companions.length > 0 && (
-                            <div>
+                            <div className="companion-container">
                                 <h3>Companions:</h3>
                                 {formData.companions.map((companion, index) => (
                                     <div key={index}>
@@ -116,7 +113,9 @@ const CheckOut = () => {
                                 ))}
                             </div>
                         )}
-                        <button type="submit">Confirm Check-Out</button>
+                        <div className="buttons">
+                            <button type="submit" className="checkout-button">Confirm Check-Out</button>
+                        </div>
                     </>
                 )}
             </form>

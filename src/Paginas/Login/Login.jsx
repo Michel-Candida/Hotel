@@ -54,10 +54,10 @@ const Login = () => {
   }, [navigate]);
 
   return (
+    <div className="Main-container">
     <div className="login-container">
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
-
         <div className="form-group">
           <label htmlFor="loginEmail">Email:</label>
           <input
@@ -88,6 +88,7 @@ const Login = () => {
       </Link>
 
       {message && <p>{message}</p>}
+    </div>
     </div>
   );
 };

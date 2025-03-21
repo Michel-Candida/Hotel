@@ -1,84 +1,90 @@
 /* Container principal do dashboard */
 .dashboard-container {
-    width: 90%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #f8f8f8;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  padding-bottom: 500px;
+  margin-bottom: 700px;
+  padding: 20px;
+  background-color: #f8f8f8;
+  display: flex;
+  justify-content: space-between; /* Organiza as seções horizontalmente */
+  gap: 20px; /* Espaçamento entre as seções */
+  flex-wrap: wrap; /* Permite que as seções quebrem linha se a tela for pequena */
+  box-sizing: border-box;
+}
+
+/* Título principal do dashboard */
+.dashboard-title {
+  width: 100%;
+  text-align: center;
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 40px;
+  font-family: 'Arial', sans-serif;
+}
+
+/* Estilo para cada seção */
+.dashboard-section {
+  background-color: #fff;
+  padding: 10px;
+  flex: 1 1 22%; /* Cada seção ocupa 22% do espaço, mas pode crescer */
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 150px; /* Garantir que as seções não fiquem muito estreitas em telas pequenas */
+}
+
+/* Títulos de cada seção */
+.dashboard-section h2 {
+  font-size: 1.8rem;
+  color: #444;
+  margin-bottom: 15px;
+  font-family: 'Arial', sans-serif;
+}
+
+/* Lista de informações (como reservas, hóspedes, etc.) */
+.dashboard-section ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Itens da lista de seções */
+.dashboard-section li {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Estilos para os spans dentro das listas */
+.dashboard-section li span {
+  font-size: 1rem;
+  color: #333;
+}
+
+/* Estilo de hover para as linhas de cada lista */
+.dashboard-section li:hover {
+  background-color: #f1f1f1;
+  cursor: pointer;
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column; /* Empilha as seções verticalmente em telas menores */
+    gap: 15px;
   }
-  
-  /* Título principal do dashboard */
+
   .dashboard-title {
-    text-align: center;
-    font-size: 2.5rem;
-    color: #333;
-    margin-bottom: 40px;
-    font-family: 'Arial', sans-serif;
+    font-size: 2rem;
   }
-  
-  /* Estilo para cada seção */
-  .dashboard-section {
-    background-color: #fff;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Títulos de cada seção */
+
   .dashboard-section h2 {
-    font-size: 1.8rem;
-    color: #444;
-    margin-bottom: 15px;
-    font-family: 'Arial', sans-serif;
+    font-size: 1.5rem;
   }
-  
-  /* Lista de informações (como reservas, hóspedes, etc.) */
-  .dashboard-section ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-  }
-  
+
   .dashboard-section li {
-    font-size: 1rem;
-    color: #555;
-    margin-bottom: 10px;
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
+    font-size: 0.9rem;
   }
-  
-  /* Estilos para as listas de itens */
-  .dashboard-section li span {
-    font-size: 1rem;
-    color: #333;
-  }
-  
-  /* Estilo de hover para as linhas de cada lista */
-  .dashboard-section li:hover {
-    background-color: #f1f1f1;
-    cursor: pointer;
-  }
-  
-  /* Responsividade para telas menores */
-  @media (max-width: 768px) {
-    .dashboard-container {
-      width: 100%;
-      padding: 15px;
-    }
-  
-    .dashboard-title {
-      font-size: 2rem;
-    }
-  
-    .dashboard-section h2 {
-      font-size: 1.5rem;
-    }
-  
-    .dashboard-section li {
-      font-size: 0.9rem;
-    }
-  }
-  
+}

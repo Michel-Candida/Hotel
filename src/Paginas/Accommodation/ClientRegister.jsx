@@ -21,8 +21,19 @@ const ClientRegister = () => {
     setErrorMessage('');  // Limpar a mensagem de erro ao digitar
   };
 
+  const validateForm = () => {
+    const { name, email, phone, document } = formData;
+    if (!name || !email || !phone || !document) {
+      setErrorMessage('All fields are required!');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;  // Valida os dados antes de submeter
+
     try {
       const response = await axios.post('http://localhost:5000/clients', formData);
       if (response.status === 201) {
@@ -34,14 +45,14 @@ const ClientRegister = () => {
       }
     } catch (error) {
       console.error('Error registering client:', error.response?.data?.message || error);
-      setErrorMessage(error.response?.data?.message || 'Error registering client');  // Atualizar mensagem de erro
+      setErrorMessage(error.response?.data?.message || 'Error registering client');
     }
   };
 
   return (
-    <div className="container">
-      <h2>Client Registration</h2>
-      <form onSubmit={handleSubmit}>
+    <div className="user-register-container">
+      <h2 className="user-register-title">Client Registration</h2>
+      <form onSubmit={handleSubmit} className="user-register-form">
         <div>
           <label>Client Code:</label>
           <input
@@ -91,7 +102,7 @@ const ClientRegister = () => {
             required
           />
         </div>
-        <button type="submit">Register</button>
+        <button type="submit" className="user-register-button">Register</button>
       </form>
       {errorMessage && <div className="error-message">{errorMessage}</div>} {/* Exibe a mensagem de erro */}
     </div>

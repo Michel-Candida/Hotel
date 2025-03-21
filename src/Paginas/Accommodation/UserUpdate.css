@@ -4,13 +4,16 @@
     margin: 50px auto;
     background-color: #fff;
     padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .user-update-container h2 {
     text-align: center;
     color: #333;
+    font-size: 24px;
+    font-weight: bold;
 }
 
 .user-update-search {
@@ -22,29 +25,59 @@
 
 .user-update-search input {
     flex: 1;
-    max-width: 300px;  /* Definindo uma largura máxima para o input */
+    max-width: 100%;  /* Alinha o input à esquerda ocupando toda a largura disponível */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    text-align: left; /* Alinha o texto à esquerda */
+}
+
+.user-update-search input:hover,
+.user-update-search input:focus {
+    border-color: #17a2b8;
+    box-shadow: 0 0 5px rgba(23, 162, 184, 0.5);
 }
 
 .user-update-search-button {
-    background-color: #17a2b8;
     padding: 10px 15px;
-    white-space: nowrap;
+    background-color: #17a2b8;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .user-update-search-button:hover {
     background-color: #138496;
 }
 
+.user-update-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 .user-update-form input {
-    width: 100%;
-    max-width: 400px;  /* Definindo uma largura máxima para os inputs no formulário */
-    padding: 8px;
+    width: 100%; /* Ajusta os inputs para ocupar 100% da largura */
+    padding: 10px;
     margin: 10px 0;
     border: 1px solid #ccc;
     border-radius: 4px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    text-align: left; /* Alinha o texto à esquerda */
+}
+
+.user-update-form input:hover,
+.user-update-form input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
 .user-update-form button {
+    width: 100%; /* Ocupa toda a largura */
+    margin-left: 0;
     padding: 10px;
     background-color: #007bff;
     color: #fff;
@@ -52,6 +85,7 @@
     border-radius: 4px;
     font-size: 16px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .user-update-form button:hover {

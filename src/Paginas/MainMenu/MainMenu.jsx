@@ -1,22 +1,26 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './MainMenu.css'; // You can create a CSS file for styling
+import { BsBarChartLineFill, BsFillPersonFill, BsFillHouseDoorFill, BsSearch } from 'react-icons/bs'; // Adicionando outros ícones
+import { FaUserEdit, FaSignInAlt, FaSignOutAlt } from 'react-icons/fa'; // Você pode importar outros ícones também
+import './MainMenu.css';
 
 const MainMenu = () => {
     const menuItems = [
-        { name: 'Login', path: '/' },
-        { name: 'Client Register', path: '/ClientRegister' },
-        { name: 'Update Client', path: '/UserUpdate' },
-        { name: 'Client Search', path: '/SearchUser' },
-        { name: 'Check In', path: '/CheckIn' },
-        { name: 'Check Out', path: '/CheckOut' },
+        { name: 'Client Register', path: '/ClientRegister', icon: <BsFillPersonFill /> },
+        { name: 'User Update', path: '/UserUpdate', icon: <FaUserEdit /> },
+        { name: 'Dashboard', path: '/Dashboard', icon: <BsBarChartLineFill /> },
+        { name: 'Room Register', path: '/RoomRegistration', icon: <BsFillHouseDoorFill /> },
+        { name: 'Room Update', path: '/RoomUpdate', icon: <BsFillHouseDoorFill /> },
+        { name: 'Search User', path: '/SearchUser', icon: <BsSearch /> },
+        { name: 'Check In', path: '/CheckIn', icon: <FaSignInAlt /> },
+        { name: 'Check Out', path: '/CheckOut', icon: <FaSignOutAlt /> },
     ];
 
     return (
         <div className="main-menu">
             {menuItems.map((item) => (
                 <Link key={item.name} to={item.path} className="menu-item">
-                    <div className="icon">{/* Add your icon here */}</div>
+                    {item.icon}
                     <div className="label">{item.name}</div>
                 </Link>
             ))}

@@ -1,0 +1,130 @@
+/* General Styling for the CheckIn Page */
+.checkin-container {
+    font-family: Arial, sans-serif;
+    margin: 50px auto;
+    width: 80%;
+    max-width: 1000px;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.checkin-container h1 {
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 20px;
+    color: #333;
+    font-weight: bold;
+}
+
+/* Checkin Form */
+.checkin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.checkin-form label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.checkin-form input {
+    padding: 8px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.checkin-form input:focus {
+    outline: none;
+    border-color: #5c9f7f;
+    box-shadow: 0 0 5px rgba(92, 159, 127, 0.5);
+}
+
+/* Button Styling */
+.checkin-form .buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+}
+
+.checkin-form .buttons button {
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.checkin-form .buttons button:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+}
+
+.checkin-form .buttons button:hover:not(:disabled) {
+    background-color: #5c9f7f;
+    color: white;
+}
+
+/* Specific Styling for the Companions */
+.companion-container {
+    margin-top: 20px;
+    border-top: 1px solid #ccc;
+    padding-top: 15px;
+}
+
+.companion-container input {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.add-remove-buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+.add-remove-buttons button {
+    width: 48%;
+}
+
+/* CheckIn Button */
+.checkin-button {
+    background-color: #5c9f7f;
+    color: white;
+    border: none;
+    padding: 15px;
+    font-size: 1.2em;
+    margin-top: 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.checkin-button:disabled {
+    background-color: #d3d3d3;
+    cursor: not-allowed;
+}
+
+.checkin-button:hover:not(:disabled) {
+    background-color: #457a63;
+}
+
+/* Back Button */
+.back-button {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #f2f2f2;
+    color: #333;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.back-button:hover {
+    background-color: #ddd;
+}

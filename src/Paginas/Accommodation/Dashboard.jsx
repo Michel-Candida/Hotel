@@ -32,7 +32,7 @@ const Dashboard = () => {
     return (
         <div className="dashboard-container">
             <h1 className="dashboard-title">Hotel Dashboard</h1>
-            
+
             <div className="dashboard-section">
                 <h2>Current Reservations</h2>
                 <ul>

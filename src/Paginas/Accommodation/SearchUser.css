@@ -16,18 +16,23 @@
     height: 350px;
     padding: 20px;
     background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     text-align: center;
     min-height: 320px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
 
 .search-user-title {
     color: #333;
     margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center; /* Centraliza o título */
 }
 
 .search-user-select,
@@ -37,24 +42,38 @@
     margin: 10px 0;
     border: 1px solid #ccc;
     border-radius: 4px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    text-align: left; /* Alinha o texto à esquerda */
 }
 
-.search-user-select {
-    margin-bottom: 10px; /* Espaçamento extra abaixo do select */
-}
-
+.search-user-select,
 .search-user-input {
-    margin-top: 10px; /* Espaçamento extra acima do input */
+    width: 100%; /* Deixe a largura ocupar 100% da caixa */
+}
+
+.search-user-select:hover,
+.search-user-input:hover {
+    border-color: #007BFF;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.search-user-select:focus,
+.search-user-input:focus {
+    border-color: #007BFF;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.8);
 }
 
 .search-user-button {
     width: 100%;
+    margin-left: 0;
     padding: 10px;
     background-color: #007BFF;
     color: #fff;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .search-user-button:hover {
@@ -83,6 +102,12 @@
 .search-user-result-item {
     padding: 10px;
     border-bottom: 1px solid #ccc;
+    background-color: #f9f9f9;
+    transition: background-color 0.3s ease;
+}
+
+.search-user-result-item:hover {
+    background-color: #e0e0e0;
 }
 
 .search-user-result-item:last-child {

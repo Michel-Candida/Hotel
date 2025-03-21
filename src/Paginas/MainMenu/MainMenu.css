@@ -1,54 +1,39 @@
 .main-menu {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f8f9fa;
-    padding: 20px;
-    box-sizing: border-box;
+    flex-direction: row; /* Mudando para linha */
+    justify-content: space-evenly; /* Distribui os itens uniformemente */
+    align-items: center; /* Centraliza os itens verticalmente */
+    height: 100vh; /* Faz o menu ocupar toda a altura da tela */
+    background-color: #f4f4f4; /* Cor de fundo para o menu */
 }
 
 .menu-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    width: 120px; /* Ajustada a largura para melhor responsividade */
-    height: 120px; /* Ajustada a altura para melhor responsividade */
-    padding: 15px;
-    margin: 15px;
-    background-color: #007bff;
-    color: white;
-    border-radius: 10px; /* Cantos mais arredondados para um estilo mais suave */
-    cursor: pointer;
-    transition: all 0.3s ease; /* Transição suave para todas as mudanças de estilo */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra sutil para dar mais profundidade */
+    padding: 20px;
+    
+    margin: 10px;
+    text-decoration: none;
+    color: black;
+    background-color: white;
+    border-radius: 8px; /* Bordas arredondadas */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    width: 150px; /* Largura fixa para os itens */
 }
 
 .menu-item:hover {
-    background-color: #0056b3;
-    transform: translateY(-5px); /* Pequeno efeito de elevação ao passar o mouse */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Sombra mais forte no hover */
+    background-color: #e0e0e0;
+    transform: scale(1.05); /* Aumenta um pouco o tamanho no hover */
 }
 
-.icon {
-    font-size: 30px; /* Aumentando o ícone para um visual mais impactante */
-    margin-bottom: 10px;
+.menu-item .label {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: bold;
 }
 
-.label {
-    font-size: 16px; /* Tamanho de fonte mais adequado */
-    font-weight: 600; /* Peso da fonte um pouco mais leve que "bold", mas ainda forte */
-    text-align: center;
-    text-transform: uppercase; /* Transformação para letras maiúsculas para dar mais impacto */
-    letter-spacing: 1px; /* Espaciamento de letras para um efeito de destaque */
-    margin-top: 5px; /* Pequeno espaçamento acima do texto */
-}
-
-@media (max-width: 768px) {
-    .menu-item {
-        width: 100px; /* Ajuste a largura para telas menores */
-        height: 100px; /* Ajuste a altura para telas menores */
-    }
+.menu-item svg {
+    font-size: 36px; /* Tamanho maior para os ícones */
 }
