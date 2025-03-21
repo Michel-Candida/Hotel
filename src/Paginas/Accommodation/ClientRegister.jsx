@@ -10,7 +10,22 @@ const ClientRegister = () => {
     phone: '',
     document: ''
   });
-  const [errorMessage, setErrorMessage] = useState('');  // Estado para mensagem de erro
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validateDocument = (document) => {
+    const documentRegex = /^[a-zA-Z0-9-]+$/;
+    return documentRegex.test(document);
+  };
+
+  const validatePhone = (phone) => {
+    const phoneRegex = /^[0-9]+$/; 
+    return phoneRegex.test(phone);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,11 +33,27 @@ const ClientRegister = () => {
       ...formData,
       [name]: value
     });
-    setErrorMessage('');  // Limpar a mensagem de erro ao digitar
+    setErrorMessage(''); 
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateEmail(formData.email)) {
+      setErrorMessage('Invalid email format');
+      return;
+    }
+
+    if (!validateDocument(formData.document)) {
+      setErrorMessage('Document must contain only numbers and be at least 8 digits long');
+      return;
+    }
+
+    if (!validatePhone(formData.phone)) {
+      setErrorMessage('Phone number must contain only numbers');
+      return;
+    }
+
     try {
       const response = await axios.post('http://localhost:5000/clients', formData);
       if (response.status === 201) {
@@ -34,7 +65,7 @@ const ClientRegister = () => {
       }
     } catch (error) {
       console.error('Error registering client:', error.response?.data?.message || error);
-      setErrorMessage(error.response?.data?.message || 'Error registering client');  // Atualizar mensagem de erro
+      setErrorMessage(error.response?.data?.message || 'Error registering client');
     }
   };
 
@@ -42,55 +73,66 @@ const ClientRegister = () => {
     <div className="container">
       <h2>Client Registration</h2>
       <form onSubmit={handleSubmit}>
+
         <div>
           <label>Client Code:</label>
           <input
             type="text"
             name="client_code"
+            placeholder="Auto-generated code"
             value={formData.client_code || 'Generating...'}
             readOnly
           />
         </div>
+
         <div>
           <label>Name:</label>
           <input
             type="text"
             name="name"
+            placeholder="Enter full name"
             value={formData.name}
             onChange={handleChange}
             required
           />
         </div>
+
         <div>
           <label>Email:</label>
           <input
             type="email"
             name="email"
+            placeholder="Enter email address"
             value={formData.email}
             onChange={handleChange}
             required
           />
         </div>
+
         <div>
           <label>Phone:</label>
           <input
             type="text"
             name="phone"
+            placeholder="Enter phone number"
             value={formData.phone}
             onChange={handleChange}
             required
           />
         </div>
+
         <div>
           <label>Document:</label>
           <input
             type="text"
             name="document"
+            placeholder="Enter document (e.g., Passport, ID)"
             value={formData.document}
             onChange={handleChange}
             required
           />
         </div>
+
         <button type="submit">Register</button>
       </form>
       {errorMessage && <div className="error-message">{errorMessage}</div>} {/* Exibe a mensagem de erro */}

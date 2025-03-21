@@ -12,6 +12,25 @@ const UserUpdate = () => {
     });
 
     const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+
+    // Função para validar email
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    // Função para validar telefone (somente números)
+    const validatePhone = (phone) => {
+        const phoneRegex = /^[0-9]+$/;
+        return phoneRegex.test(phone);
+    };
+
+    // Função para validar documento (somente letras e números)
+    const validateDocument = (document) => {
+        const documentRegex = /^[a-zA-Z0-9]+$/;
+        return documentRegex.test(document);
+    };
 
     // Função para buscar o cliente
     const handleSearchClient = async () => {
@@ -21,6 +40,7 @@ const UserUpdate = () => {
         }
 
         setLoading(true);
+        setErrorMessage('');
         try {
             const { data } = await axios.get(`http://localhost:5000/clients/${clientCode}`);
 
@@ -30,11 +50,11 @@ const UserUpdate = () => {
                     ...data
                 }));
             } else {
-                alert("Client not found.");
+                setErrorMessage("Client code not found.");
             }
         } catch (error) {
             console.error("Error fetching client:", error);
-            alert("Error fetching client. Please try again.");
+            setErrorMessage("Error fetching client. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -58,6 +78,21 @@ const UserUpdate = () => {
             return;
         }
 
+        if (!validateEmail(formData.email)) {
+            setErrorMessage("Invalid email format");
+            return;
+        }
+
+        if (!validatePhone(formData.phone)) {
+            setErrorMessage("Phone number must contain only numbers");
+            return;
+        }
+
+        if (!validateDocument(formData.document)) {
+            setErrorMessage("Document must contain only letters and numbers");
+            return;
+        }
+
         try {
             const response = await axios.put(`http://localhost:5000/clients/${clientCode}`, formData);
 
@@ -69,7 +104,11 @@ const UserUpdate = () => {
             }
         } catch (error) {
             console.error("Error updating client:", error);
-            alert("Error updating client. Please check the data and try again.");
+            if (error.response?.data?.message?.includes("Document already exists")) {
+                setErrorMessage("Document already exists. Please use a different one.");
+            } else {
+                setErrorMessage("Error updating client. Please check the data and try again.");
+            }
         }
     };
 
@@ -91,6 +130,7 @@ const UserUpdate = () => {
                     {loading ? "Searching..." : "Search Client"}
                 </button>
             </div>
+            {errorMessage && <div className="error-message">{errorMessage}</div>}
             <form className="user-update-form" onSubmit={handleUpdateClient}>
                 <div>
                     <label>Name:</label>
@@ -100,6 +140,7 @@ const UserUpdate = () => {
                         value={formData.name} 
                         onChange={handleChange} 
                         required 
+                        placeholder="Enter full name"
                     />
                 </div>
                 <div>
@@ -110,6 +151,7 @@ const UserUpdate = () => {
                         value={formData.email} 
                         onChange={handleChange} 
                         required 
+                        placeholder="Enter email address"
                     />
                 </div>
                 <div>
@@ -120,6 +162,7 @@ const UserUpdate = () => {
                         value={formData.phone} 
                         onChange={handleChange} 
                         required 
+                        placeholder="Enter phone number"
                     />
                 </div>
                 <div>
@@ -130,6 +173,7 @@ const UserUpdate = () => {
                         value={formData.document} 
                         onChange={handleChange} 
                         required 
+                        placeholder="Enter document (letters and numbers only)"
                     />
                 </div>
                 <button type="submit">Update Client</button>
