@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
-import "./Check.css";
 import { Link } from "react-router-dom";
+import './checkin.css';  // Import the custom CSS
 
 const CheckIn = () => {
     const [formData, setFormData] = useState({
@@ -52,9 +52,9 @@ const CheckIn = () => {
 
     const checkRoomAvailability = async (roomNumber, checkInDate) => {
         if (!roomNumber || !checkInDate) return;
-    
-        setIsRoomAvailable(false); // Desabilita o botão enquanto a verificação está em andamento.
-    
+
+        setIsRoomAvailable(false); // Disable button while checking availability.
+
         try {
             const response = await axios.get(
                 "http://localhost:5000/check-room-availability",
@@ -62,9 +62,9 @@ const CheckIn = () => {
                     params: { room_number: roomNumber, checkin_date: checkInDate },
                 }
             );
-    
-            setIsRoomAvailable(response.data.available); // Atualiza a disponibilidade
-    
+
+            setIsRoomAvailable(response.data.available); // Update availability
+
             if (!response.data.available) {
                 alert("The selected room is already occupied on this date!");
             }
@@ -73,24 +73,24 @@ const CheckIn = () => {
             alert("Error checking availability.");
         }
     };
-    
+
     const handleRoomNumberChange = (e) => {
         const roomNumber = e.target.value;
         setFormData((prevState) => ({ ...prevState, roomNumber }));
-    
+
         if (formData.checkInDate) {
             checkRoomAvailability(roomNumber, formData.checkInDate);
         }
     };
-    
+
     const handleCheckInDateChange = (e) => {
         const checkInDate = e.target.value;
         setFormData((prevState) => ({ ...prevState, checkInDate }));
-    
+
         if (formData.roomNumber) {
             checkRoomAvailability(formData.roomNumber, checkInDate);
         }
-    }
+    };
 
     const handleCheckOutDateChange = (e) => {
         setFormData((prevState) => ({ ...prevState, checkOutDate: e.target.value }));
@@ -110,7 +110,7 @@ const CheckIn = () => {
     const handleRemoveCompanion = () => {
         if (formData.companions.length > 0) {
             const updatedCompanions = [...formData.companions];
-            updatedCompanions.pop(); 
+            updatedCompanions.pop();
 
             setFormData((prevState) => ({
                 ...prevState,
@@ -145,9 +145,9 @@ const CheckIn = () => {
     };
 
     return (
-        <div>
+        <div className="checkin-container">
             <h1>Check-In</h1>
-            <form onSubmit={handleSubmit}>
+            <form className="checkin-form" onSubmit={handleSubmit}>
                 <div>
                     <label>Client Code:</label>
                     <input
@@ -217,17 +217,22 @@ const CheckIn = () => {
                     </>
                 )}
 
-                <div>
-                    <button type="button" onClick={handleAddCompanion}>
+                <div className="add-remove-buttons">
+                    <button type="button" onClick={handleAddCompanion} className="neels add-companion-button">
                         Add Companion
                     </button>
-                    <button type="button" onClick={handleRemoveCompanion} disabled={formData.companions.length === 0}>
+                    <button 
+                        type="button" 
+                        onClick={handleRemoveCompanion} 
+                        disabled={formData.companions.length === 0} 
+                        className="neels remove-companion-button"
+                    >
                         Remove Companion
                     </button>
                 </div>
 
                 {formData.companions.map((companion, index) => (
-                    <div key={index}>
+                    <div key={index} className="companion-container">
                         <div>
                             <label>Companion Name {index + 1}:</label>
                             <input
@@ -262,7 +267,7 @@ const CheckIn = () => {
                 ))}
 
                 <button
-                    className="cheking-button"
+                    className="checkin-button"
                     type="submit"
                     disabled={!isRoomAvailable || !formData.checkInDate || !formData.roomNumber}
                 >
