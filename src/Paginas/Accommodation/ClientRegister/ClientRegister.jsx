@@ -11,6 +11,7 @@ const ClientRegister = () => {
     document: ''
   });
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -33,7 +34,8 @@ const ClientRegister = () => {
       ...formData,
       [name]: value
     });
-    setErrorMessage(''); 
+    setErrorMessage('');
+    setSuccessMessage('');
   };
 
   const validateForm = () => {
@@ -47,26 +49,29 @@ const ClientRegister = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-<<<<<<< HEAD
 
+    setErrorMessage('');
+    setSuccessMessage('');
+    
+    if (!validateForm()) {
+      return;
+    }
+  
     if (!validateEmail(formData.email)) {
       setErrorMessage('Invalid email format');
       return;
     }
-
+  
     if (!validateDocument(formData.document)) {
       setErrorMessage('Document must contain only numbers and be at least 8 digits long');
       return;
     }
-
+  
     if (!validatePhone(formData.phone)) {
       setErrorMessage('Phone number must contain only numbers');
       return;
     }
-=======
-    if (!validateForm()) return;  // Valida os dados antes de submeter
->>>>>>> 6eac6a72e598e6c7e53d05e5d8880b890203d6c9
-
+  
     try {
       const response = await axios.post('http://localhost:5000/clients', formData);
       if (response.status === 201) {
@@ -74,7 +79,7 @@ const ClientRegister = () => {
           ...prevData,
           client_code: response.data.client.client_code
         }));
-        alert('Client registered successfully!');
+        setSuccessMessage('Client registered successfully!');
       }
     } catch (error) {
       console.error('Error registering client:', error.response?.data?.message || error);
@@ -83,16 +88,9 @@ const ClientRegister = () => {
   };
 
   return (
-<<<<<<< HEAD
-    <div className="container">
-      <h2>Client Registration</h2>
-      <form onSubmit={handleSubmit}>
-
-=======
     <div className="user-register-container">
       <h2 className="user-register-title">Client Registration</h2>
       <form onSubmit={handleSubmit} className="user-register-form">
->>>>>>> 6eac6a72e598e6c7e53d05e5d8880b890203d6c9
         <div>
           <label>Client Code:</label>
           <input
@@ -151,14 +149,12 @@ const ClientRegister = () => {
             required
           />
         </div>
-<<<<<<< HEAD
-
-        <button type="submit">Register</button>
-=======
         <button type="submit" className="user-register-button">Register</button>
->>>>>>> 6eac6a72e598e6c7e53d05e5d8880b890203d6c9
       </form>
-      {errorMessage && <div className="error-message">{errorMessage}</div>} {/* Exibe a mensagem de erro */}
+
+      {errorMessage && <div className="error-message">{errorMessage}</div>}
+
+      {successMessage && <div className="success-message">{successMessage}</div>}
     </div>
   );
 };

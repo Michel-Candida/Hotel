@@ -8,8 +8,9 @@ const SearchUser = () => {
     const [error, setError] = useState('');
 
     const handleSearch = async () => {
-        setError(''); // Clears any previous errors
+        setError(''); // Limpar erro antes de buscar
 
+        // Validações para garantir que os dados inseridos estão corretos
         if (searchType === 'name' && !/^[a-zA-Z\sÀ-ÖØ-öø-ÿ]+$/.test(searchTerm)) {
             setError('Name should contain only letters, spaces, and accents.');
             return;
@@ -28,7 +29,6 @@ const SearchUser = () => {
         }
 
         try {
-            
             const response = await fetch(`http://localhost:5000/api/search?${searchType}=${searchTerm}`);
 
             if (!response.ok) {
@@ -37,10 +37,21 @@ const SearchUser = () => {
 
             const results = await response.json();
 
-            setSearchResults(results);
+            if (results.length === 0) {
+                setSearchResults([]);
+                setError('No clients found with the provided information.');
+            } else {
+                setSearchResults(results);
+            }
         } catch (err) {
             console.error('Error searching for clients:', err);
             setError('Error searching for clients');
+        }
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
         }
     };
 
@@ -78,7 +89,7 @@ const SearchUser = () => {
                             ))}
                         </ul>
                     ) : (
-                        <p className="search-user-no-results">No client found</p>
+                        !error && <p className="search-user-no-results">No client found</p>
                     )}
                 </div>
             </div>

@@ -13,26 +13,24 @@ const UserUpdate = () => {
 
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
 
-    // Função para validar email
+    
     const validateEmail = (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
     };
-
-    // Função para validar telefone (somente números)
+   
     const validatePhone = (phone) => {
         const phoneRegex = /^[0-9]+$/;
         return phoneRegex.test(phone);
     };
 
-    // Função para validar documento (somente letras e números)
     const validateDocument = (document) => {
         const documentRegex = /^[a-zA-Z0-9]+$/;
         return documentRegex.test(document);
     };
 
-    // Função para buscar o cliente
     const handleSearchClient = async () => {
         if (!clientCode) {
             alert("Please enter a client code.");
@@ -40,7 +38,8 @@ const UserUpdate = () => {
         }
 
         setLoading(true);
-        setErrorMessage('');
+        setErrorMessage('');  // Limpa a mensagem de erro ao iniciar a busca
+        setSuccessMessage(''); // Limpa a mensagem de sucesso ao iniciar a busca
         try {
             const { data } = await axios.get(`http://localhost:5000/clients/${clientCode}`);
 
@@ -60,7 +59,6 @@ const UserUpdate = () => {
         }
     };
 
-    // Função para lidar com alterações nos campos
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prevState => ({
@@ -69,7 +67,6 @@ const UserUpdate = () => {
         }));
     };
 
-    // Função para atualizar o cliente
     const handleUpdateClient = async (e) => {
         e.preventDefault();
 
@@ -77,6 +74,10 @@ const UserUpdate = () => {
             alert("Please search for a client first.");
             return;
         }
+
+        // Limpa as mensagens antes de iniciar a atualização
+        setErrorMessage('');
+        setSuccessMessage('');
 
         if (!validateEmail(formData.email)) {
             setErrorMessage("Invalid email format");
@@ -96,11 +97,10 @@ const UserUpdate = () => {
         try {
             const response = await axios.put(`http://localhost:5000/clients/${clientCode}`, formData);
 
-            // Verificar se a atualização foi bem-sucedida
             if (response.status === 200) {
-                alert("Client updated successfully!");
+                setSuccessMessage("Client updated successfully!"); // Define a mensagem de sucesso
             } else {
-                alert("Unexpected response from the server.");
+                setErrorMessage("Unexpected response from the server.");
             }
         } catch (error) {
             console.error("Error updating client:", error);
@@ -130,7 +130,10 @@ const UserUpdate = () => {
                     {loading ? "Searching..." : "Search Client"}
                 </button>
             </div>
+
             {errorMessage && <div className="error-message">{errorMessage}</div>}
+            {successMessage && <div className="success-message">{successMessage}</div>}
+            
             <form className="user-update-form" onSubmit={handleUpdateClient}>
                 <div>
                     <label>Name:</label>
