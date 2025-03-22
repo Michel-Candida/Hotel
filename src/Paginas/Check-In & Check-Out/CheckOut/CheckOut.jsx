@@ -16,39 +16,50 @@ const CheckOut = () => {
         companions: []
     });
 
+    const [loading, setLoading] = useState(false);
+
     const handleClientCodeChange = async (e) => {
         const clientCode = e.target.value;
-        setFormData({ ...formData, clientCode });
+        setFormData((prev) => ({ ...prev, clientCode }));
 
         if (clientCode.length > 0) {
+            setLoading(true);
             try {
                 const { data } = await axios.get(`https://your-backend.com/reservations/${clientCode}`);
-                setFormData({
-                    ...formData,
-                    clientCode,
+                setFormData((prev) => ({
+                    ...prev,
                     name: data.client.name,
                     email: data.client.email,
                     phone: data.client.phone,
                     document: data.client.document,
                     roomNumber: data.roomNumber,
                     checkInDate: data.checkInDate,
-                    companions: data.companions || []
-                });
+                    companions: data.companions || [],
+                }));
             } catch (error) {
                 console.error("Error fetching reservation:", error);
                 alert("Reservation not found!");
+                setFormData((prev) => ({ ...prev, name: '', email: '', phone: '', document: '', roomNumber: '', checkInDate: '', companions: [] }));
+            } finally {
+                setLoading(false);
             }
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
         try {
-            await axios.post('https://your-backend.com/checkout', { ...formData, checkOutDate: new Date().toISOString().split('T')[0] });
+            await axios.post('https://your-backend.com/checkout', {
+                ...formData,
+                checkOutDate: new Date().toISOString().split('T')[0]
+            });
             alert("Check-Out successfully completed!");
         } catch (error) {
             console.error("Error during check-out:", error);
             alert("Error completing check-out.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -64,9 +75,11 @@ const CheckOut = () => {
                         value={formData.clientCode}
                         onChange={handleClientCodeChange}
                         required
+                        disabled={loading}
                     />
                 </div>
-                {formData.name && (
+                {loading && <p>Loading reservation details...</p>}
+                {formData.name && !loading && (
                     <>
                         <div>
                             <label>Name:</label>
@@ -101,20 +114,16 @@ const CheckOut = () => {
                                 <h3>Companions:</h3>
                                 {formData.companions.map((companion, index) => (
                                     <div key={index}>
-                                        <div>
-                                            <label>Companion Name {index + 1}:</label>
-                                            <input type="text" value={companion.name} readOnly />
-                                        </div>
-                                        <div>
-                                            <label>Companion Email {index + 1}:</label>
-                                            <input type="email" value={companion.email} readOnly />
-                                        </div>
+                                        <label>Companion {index + 1}:</label>
+                                        <input type="text" value={companion.name} readOnly />
                                     </div>
                                 ))}
                             </div>
                         )}
                         <div className="buttons">
-                            <button type="submit" className="checkout-button">Confirm Check-Out</button>
+                            <button type="submit" className="checkout-button" disabled={loading}>
+                                {loading ? "Processing..." : "Confirm Check-Out"}
+                            </button>
                         </div>
                     </>
                 )}

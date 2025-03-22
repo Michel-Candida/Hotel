@@ -1,17 +1,25 @@
 /* General Styling for the CheckOut Page */
 .checkout-container {
     font-family: Arial, sans-serif;
-    margin: 20px auto;
+    margin: 50px auto;
     width: 80%;
     max-width: 1000px;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .checkout-container h1 {
     text-align: center;
     font-size: 2em;
     margin-bottom: 20px;
+    color: #333;
+    font-weight: bold;
 }
 
+/* CheckOut Form */
 .checkout-form {
     display: flex;
     flex-direction: column;
@@ -21,20 +29,24 @@
 .checkout-form label {
     font-weight: bold;
     margin-bottom: 5px;
+    color: #333;
 }
 
 .checkout-form input {
-    padding: 8px;
+    padding: 10px;
     font-size: 1em;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 6px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .checkout-form input:focus {
     outline: none;
     border-color: #5c9f7f;
+    box-shadow: 0 0 5px rgba(92, 159, 127, 0.5);
 }
 
+/* Buttons */
 .checkout-form .buttons {
     display: flex;
     gap: 10px;
@@ -42,10 +54,12 @@
 }
 
 .checkout-form .buttons button {
-    padding: 10px 20px;
+    padding: 12px 20px;
     font-size: 1em;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .checkout-form .buttons button:disabled {
@@ -56,29 +70,56 @@
 .checkout-form .buttons button:hover:not(:disabled) {
     background-color: #5c9f7f;
     color: white;
+    transform: scale(1.05);
 }
 
-/* Specific Styling for the Companions */
+/* Companion Section */
 .companion-container {
     margin-top: 20px;
-    border-top: 1px solid #ccc;
+    border-top: 2px solid #ccc;
     padding-top: 15px;
 }
 
 .companion-container input {
     width: 100%;
     margin-bottom: 10px;
+    padding: 10px;
 }
 
+/* Improved Add/Remove Buttons */
 .add-remove-buttons {
     display: flex;
     justify-content: space-between;
+    gap: 10px;
 }
 
 .add-remove-buttons button {
-    width: 48%;
+    flex: 1;
+    padding: 12px;
+    font-size: 1em;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
+.add-remove-buttons .add-button {
+    background-color: #28a745;
+    color: white;
+}
+
+.add-remove-buttons .remove-button {
+    background-color: #dc3545;
+    color: white;
+}
+
+.add-remove-buttons button:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+/* CheckOut Button */
 .checkout-button {
     background-color: #5c9f7f;
     color: white;
@@ -87,7 +128,8 @@
     font-size: 1.2em;
     margin-top: 20px;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: 6px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .checkout-button:disabled {
@@ -97,19 +139,23 @@
 
 .checkout-button:hover:not(:disabled) {
     background-color: #457a63;
+    transform: scale(1.05);
 }
 
 /* Back Button */
 .back-button {
     display: inline-block;
     margin-top: 20px;
-    padding: 10px 20px;
+    padding: 12px 20px;
     background-color: #f2f2f2;
     color: #333;
     text-decoration: none;
-    border-radius: 5px;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .back-button:hover {
     background-color: #ddd;
+    transform: scale(1.05);
 }
