@@ -1,10 +1,13 @@
 .main-menu {
-    display: flex;
-    flex-direction: row; /* Mudando para linha */
-    justify-content: space-evenly; /* Distribui os itens uniformemente */
-    align-items: center; /* Centraliza os itens verticalmente */
-    height: 100vh; /* Faz o menu ocupar toda a altura da tela */
-    background-color: #f4f4f4; /* Cor de fundo para o menu */
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5 colunas na primeira linha */
+    grid-template-rows: auto auto; /* Duas linhas automáticas */
+    gap: 15px; /* Espaço entre os itens */
+    justify-content: center; /* Centraliza a grade */
+    align-content: center; /* Centraliza a grade verticalmente */
+    height: 100vh;
+    background-color: #f4f4f4;
+    padding: 20px;
 }
 
 .menu-item {
@@ -12,20 +15,18 @@
     flex-direction: column;
     align-items: center;
     padding: 20px;
-    
-    margin: 10px;
     text-decoration: none;
     color: black;
     background-color: white;
-    border-radius: 8px; /* Bordas arredondadas */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, background-color 0.3s ease;
-    width: 150px; /* Largura fixa para os itens */
+    width: 150px;
 }
 
 .menu-item:hover {
     background-color: #e0e0e0;
-    transform: scale(1.05); /* Aumenta um pouco o tamanho no hover */
+    transform: scale(1.05);
 }
 
 .menu-item .label {
@@ -35,5 +36,10 @@
 }
 
 .menu-item svg {
-    font-size: 36px; /* Tamanho maior para os ícones */
+    font-size: 36px;
+}
+
+/* Faz com que os últimos 4 itens fiquem centralizados abaixo */
+.menu-item:nth-child(n+6) {
+    grid-column: span 1; /* Cada item ocupa uma coluna */
 }

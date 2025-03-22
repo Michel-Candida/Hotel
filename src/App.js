@@ -10,7 +10,8 @@ import SearchUser from './Paginas/Accommodation/SearchUser/SearchUser';
 import MainMenu from './Paginas/MainMenu/MainMenu';
 import RoomRegistration from './Paginas/Accommodation/RoomRegister/RoomRegistration';
 import RoomUpdate from './Paginas/Accommodation/RoomUpdate/RoomUpdate';
-import Dashboard from './Paginas/Accommodation/Dashboard/Dashboard';  // Alterei aqui
+import Dashboard from './Paginas/Accommodation/Dashboard/Dashboard';
+import UserCreate from './Paginas/UserCreate/UserCreate';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <Route path="/RoomRegistration" element={<RoomRegistration/>}/>
         <Route path="/RoomUpdate" element={<RoomUpdate/>}/>
         <Route path="/Dashboard" element={<Dashboard/>}/>
+        <Route path="/UserCreate" element={<UserCreate/>}/>
       </Routes>
     </Router>
   );
