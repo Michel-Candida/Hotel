@@ -3,6 +3,7 @@ import axios from 'axios';
 import './ClientRegister.css';
 
 const ClientRegister = () => {
+
   const [formData, setFormData] = useState({
     client_code: '',
     name: '',
@@ -12,6 +13,10 @@ const ClientRegister = () => {
   });
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+
+  const api = axios.create({
+    baseURL: 'http://localhost:5000', // O nome do serviço do backend
+  });
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -73,7 +78,7 @@ const ClientRegister = () => {
     }
   
     try {
-      const response = await axios.post('http://localhost:5000/clients', formData);
+      const response = await api.post('/clients', formData);
       if (response.status === 201) {
         setFormData((prevData) => ({
           ...prevData,

@@ -20,6 +20,8 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
+module.exports = pool;
+
 app.get("/api/status", (req, res) => res.json({ message: "Hotel backend is running!" }));
 
 // Fetch example data
