@@ -1,17 +1,15 @@
-version: "3.8"
-
 services:
   hotel-db:
     image: postgres:latest
     container_name: hotel-db
     environment:
       POSTGRES_USER: admin
-      POSTGRES_PASSWORD: adminpassword
-      POSTGRES_DB: hotel
+      POSTGRES_PASSWORD: Apache7300
+      POSTGRES_DB: hotel-db
     ports:
-      - "5432:5432"
+      - "5433:5432"  
     volumes:
-      - hotel-db-data:/var/lib/postgresql/data
+      - hotel-db-data:/var/lib/postgresql/data 
     networks:
       - hotel-net
 
@@ -21,3 +19,4 @@ networks:
 
 volumes:
   hotel-db-data:
+    driver: local 

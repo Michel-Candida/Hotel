@@ -1,20 +1,17 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
-// Function to generate the password hash
-async function hashPassword(password) {
-  const saltRounds = 10; // Number of rounds to generate the salt
-  const hash = await bcrypt.hash(password, saltRounds);
-  return hash;
-}
-
-// Function to compare the password with the stored hash
-async function comparePassword(password, hash) {
-  const match = await bcrypt.compare(password, hash);
-  return match; // Returns true if the password matches the hash
-}
-
-// Export functions
-module.exports = {
-  hashPassword,
-  comparePassword,
+const hashPassword = async (password) => {
+  const salt = await bcrypt.genSalt(10);
+  return await bcrypt.hash(password, salt);
 };
+
+const comparePassword = async (inputPassword, storedHash) => {
+  console.log("Input password:", inputPassword);  // Log para ver a senha fornecida
+  console.log("Stored hash:", storedHash);  // Log para ver o hash armazenado no banco
+  const isMatch = await bcrypt.compare(inputPassword, storedHash);
+  console.log("Password match:", isMatch);  // Log para verificar o resultado da comparação
+  return isMatch;
+};
+
+
+module.exports = { hashPassword, comparePassword };

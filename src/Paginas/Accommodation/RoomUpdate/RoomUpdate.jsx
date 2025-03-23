@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios"; 
 import styles from "./RoomUpdate.module.css";
 
 const RoomUpdate = () => {
@@ -22,39 +23,22 @@ const RoomUpdate = () => {
         "Non-Smoking",
     ];
 
-    // Simulação de um banco de dados (substituir por API depois)
-    const mockDatabase = {
-        "101": {
-            name: "Suite Deluxe",
-            beds: 2,
-            bathroom: 1,
-            capacity: 4,
-            size: 35,
-            options: ["Double Bed", "Garden View", "Wireless Internet"],
-        },
-        "102": {
-            name: "Standard Room",
-            beds: 1,
-            bathroom: 1,
-            capacity: 2,
-            size: 25,
-            options: ["Twin Bed", "Cable TV", "Non-Smoking"],
-        },
-    };
-
-    // Buscar quarto pelo código
     const fetchRoomData = () => {
         setLoading(true);
-        setTimeout(() => {
-            if (mockDatabase[roomCode]) {
-                setRoomDetails(mockDatabase[roomCode]);
-                setError("");
-            } else {
+        setError("");
+    
+        axios
+            .get(`http://localhost:5000/api/rooms/${roomCode}`)  
+            .then((response) => {
+                setRoomDetails(response.data);
+            })
+            .catch((err) => {
                 setRoomDetails(null);
                 setError("Room not found. Please check the code.");
-            }
-            setLoading(false);
-        }, 1000);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     };
 
     const handleInputChange = (e) => {
@@ -73,8 +57,40 @@ const RoomUpdate = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log("Updated Room Details:", roomDetails);
-        alert("Room updated successfully!");
+    
+        if (
+            roomDetails.beds < 1 ||
+            roomDetails.bathroom < 1 ||
+            roomDetails.capacity < 1 ||
+            roomDetails.size < 1
+        ) {
+            alert("Nenhum campo numérico pode ser negativo ou zero.");
+            return;
+        }
+    
+        if (roomDetails.name.length < 3) {
+            alert("O nome do quarto deve ter pelo menos 3 caracteres.");
+            return;
+        }
+    
+        if (roomDetails.options.length === 0) {
+            alert("Por favor, selecione pelo menos uma opção para o quarto.");
+            return;
+        }
+    
+        setLoading(true);
+    
+        axios
+            .put(`http://localhost:5000/api/rooms/${roomCode}`, roomDetails) 
+            .then(() => {
+                alert("Room updated successfully!");
+            })
+            .catch((err) => {
+                setError("Error updating the room.");
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     };
 
     return (
@@ -99,13 +115,17 @@ const RoomUpdate = () => {
 
             {roomDetails && (
                 <form onSubmit={handleSubmit}>
-                    {[
-                        { label: "Room Name/Code", name: "name", type: "text" },
-                        { label: "Number of Beds", name: "beds", type: "number" },
-                        { label: "Number of Bathrooms", name: "bathroom", type: "number" },
-                        { label: "Capacity (People)", name: "capacity", type: "number" },
-                        { label: "Room Size (m²)", name: "size", type: "number" },
-                    ].map(({ label, name, type }) => (
+                    {[{
+                        label: "Room Name/Code", name: "name", type: "text"
+                    }, {
+                        label: "Number of Beds", name: "beds", type: "number"
+                    }, {
+                        label: "Number of Bathrooms", name: "bathroom", type: "number"
+                    }, {
+                        label: "Capacity (People)", name: "capacity", type: "number"
+                    }, {
+                        label: "Room Size (m²)", name: "size", type: "number"
+                    }].map(({ label, name, type }) => (
                         <div key={name} className={styles.formGroup}>
                             <label className={styles.label}>{label}</label>
                             <input
@@ -135,7 +155,9 @@ const RoomUpdate = () => {
                         </div>
                     </div>
 
-                    <button type="submit" className={styles.updateButton}>Update Room</button>
+                    <button type="submit" className={styles.updateButton}>
+                        {loading ? "Updating..." : "Update Room"}
+                    </button>
                 </form>
             )}
         </div>

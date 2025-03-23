@@ -15,7 +15,7 @@ const ClientRegister = () => {
   const [successMessage, setSuccessMessage] = useState('');
 
   const api = axios.create({
-    baseURL: 'http://localhost:5000', // O nome do serviço do backend
+    baseURL: 'http://localhost:5000',
   });
 
   const validateEmail = (email) => {

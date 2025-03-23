@@ -10,15 +10,18 @@ const CheckIn = () => {
         email: "",
         phone: "",
         document: "",
-        roomNumber: "",
-        checkInDate: "",
-        checkOutDate: "",
-        numberOfPeople: 1,
+        room_id: "", // Alterado de roomNumber para room_id
+        checkin_date: "", // Alterado de checkInDate para checkin_date
+        checkout_date: "", // Alterado de checkOutDate para checkout_date
+        number_of_people: 1, // Alterado de numberOfPeople para number_of_people
         companions: [],
     });
 
+    
     const [isRoomAvailable, setIsRoomAvailable] = useState(true);
 
+   
+      
     const handleClientCodeChange = async (e) => {
         const clientCode = e.target.value;
         setFormData((prevState) => ({ ...prevState, clientCode }));
@@ -35,10 +38,10 @@ const CheckIn = () => {
                         email: data.email || "",
                         phone: data.phone || "",
                         document: data.document || "",
-                        checkInDate: "",
-                        checkOutDate: "",
-                        roomNumber: "",
-                        companions: [],
+                        checkin_date: "", // Reset check-in date
+                        checkout_date: "", // Reset checkout date
+                        room_id: "", // Reset room_id
+                        companions: [], // Reset companions
                     }));
                 } else {
                     alert("Client not found!");
@@ -50,23 +53,20 @@ const CheckIn = () => {
         }
     };
 
-    const checkRoomAvailability = async (roomNumber, checkInDate) => {
-        if (!roomNumber || !checkInDate) return;
+    const checkRoomAvailability = async (room_id, checkin_date, checkout_date) => {
+        if (!room_id || !checkin_date || !checkout_date) return;
 
-        setIsRoomAvailable(false); // Disable button while checking availability.
+        setIsRoomAvailable(false); // Disable the button while checking availability
 
         try {
-            const response = await axios.get(
-                "http://localhost:5000/check-room-availability",
-                {
-                    params: { room_number: roomNumber, checkin_date: checkInDate },
-                }
-            );
+            const response = await axios.get("http://localhost:5000/check-room-availability", {
+                params: { room_id, checkin_date, checkout_date },
+            });
 
             setIsRoomAvailable(response.data.available); // Update availability
 
             if (!response.data.available) {
-                alert("The selected room is already occupied on this date!");
+                alert("The selected room is already occupied during this period!");
             }
         } catch (error) {
             console.error("Error checking room availability:", error);
@@ -75,31 +75,38 @@ const CheckIn = () => {
     };
 
     const handleRoomNumberChange = (e) => {
-        const roomNumber = e.target.value;
-        setFormData((prevState) => ({ ...prevState, roomNumber }));
+        const room_id = e.target.value;  // Alterado para room_id
+        setFormData((prevState) => ({ ...prevState, room_id }));
 
-        if (formData.checkInDate) {
-            checkRoomAvailability(roomNumber, formData.checkInDate);
+        if (formData.checkin_date && formData.checkout_date) {
+            checkRoomAvailability(room_id, formData.checkin_date, formData.checkout_date);
         }
     };
 
-    const handleCheckInDateChange = (e) => {
-        const checkInDate = e.target.value;
-        setFormData((prevState) => ({ ...prevState, checkInDate }));
+    const handleCheckinDateChange = (e) => {
+        const checkin_date = e.target.value;
+        setFormData((prevState) => ({ ...prevState, checkin_date }));
 
-        if (formData.roomNumber) {
-            checkRoomAvailability(formData.roomNumber, checkInDate);
+        if (formData.room_id) {
+            checkRoomAvailability(formData.room_id, checkin_date, formData.checkout_date);
         }
     };
 
-    const handleCheckOutDateChange = (e) => {
-        setFormData((prevState) => ({ ...prevState, checkOutDate: e.target.value }));
+    const handleCheckoutDateChange = (e) => {
+        const checkout_date = e.target.value;
+
+        if (new Date(checkout_date) < new Date(formData.checkin_date)) {
+            alert("Check-out date cannot be earlier than check-in date.");
+            return;
+        }
+
+        setFormData((prevState) => ({ ...prevState, checkout_date }));
     };
 
     const handleAddCompanion = () => {
         setFormData((prevState) => ({
             ...prevState,
-            numberOfPeople: prevState.numberOfPeople + 1,
+            number_of_people: prevState.number_of_people + 1, // Alterado para number_of_people
             companions: [
                 ...prevState.companions,
                 { name: "", phone: "", document: "" },
@@ -114,7 +121,7 @@ const CheckIn = () => {
 
             setFormData((prevState) => ({
                 ...prevState,
-                numberOfPeople: prevState.numberOfPeople - 1,
+                number_of_people: prevState.number_of_people - 1, // Alterado para number_of_people
                 companions: updatedCompanions,
             }));
         }
@@ -129,7 +136,7 @@ const CheckIn = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+        
         if (!isRoomAvailable) {
             alert("The selected room is occupied. Please choose another.");
             return;
@@ -183,11 +190,11 @@ const CheckIn = () => {
                 {formData.name && (
                     <>
                         <div>
-                            <label>Room Number:</label>
+                            <label>Room Number (Room ID):</label>
                             <input
                                 type="text"
-                                name="roomNumber"
-                                value={formData.roomNumber}
+                                name="room_id"  // Alterado para room_id
+                                value={formData.room_id}
                                 onChange={handleRoomNumberChange}
                                 required
                             />
@@ -197,9 +204,9 @@ const CheckIn = () => {
                             <label>Check-In Date:</label>
                             <input
                                 type="date"
-                                name="checkInDate"
-                                value={formData.checkInDate}
-                                onChange={handleCheckInDateChange}
+                                name="checkin_date"  // Alterado para checkin_date
+                                value={formData.checkin_date}
+                                onChange={handleCheckinDateChange}
                                 required
                             />
                         </div>
@@ -208,9 +215,9 @@ const CheckIn = () => {
                             <label>Check-Out Date:</label>
                             <input
                                 type="date"
-                                name="checkOutDate"
-                                value={formData.checkOutDate}
-                                onChange={handleCheckOutDateChange}
+                                name="checkout_date"  // Alterado para checkout_date
+                                value={formData.checkout_date}
+                                onChange={handleCheckoutDateChange}
                                 required
                             />
                         </div>
@@ -269,7 +276,7 @@ const CheckIn = () => {
                 <button
                     className="checkin-button"
                     type="submit"
-                    disabled={!isRoomAvailable || !formData.checkInDate || !formData.roomNumber}
+                    disabled={!isRoomAvailable || !formData.checkin_date || !formData.room_id}
                 >
                     Confirm Check-In
                 </button>

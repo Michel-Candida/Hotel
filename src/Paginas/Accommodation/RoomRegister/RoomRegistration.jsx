@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styles from "./RoomRegistration.module.css";
+import axios from "axios";
 
 const RoomRegistration = () => {
     const [roomDetails, setRoomDetails] = useState({
@@ -12,8 +13,7 @@ const RoomRegistration = () => {
         options: [],
     });
     
-    // Flag para indicar se o banco de dados já está configurado
-    const isDatabaseConfigured = false; // Altere para 'true' quando o banco de dados estiver configurado
+    const isDatabaseConfigured = true;
 
     const roomOptions = [
         "Double Bed",
@@ -32,15 +32,13 @@ const RoomRegistration = () => {
 
     useEffect(() => {
         if (isDatabaseConfigured) {
-            // Lógica para buscar o último ID do banco de dados
             const fetchLastRoomIdFromDatabase = async () => {
-                const lastRoomId = 100; // Exemplo fictício
+                const lastRoomId = 100;
                 setRoomDetails((prev) => ({ ...prev, id: lastRoomId + 1 }));
             };
 
             fetchLastRoomIdFromDatabase();
         } else {
-            // Lógica para gerar um ID localmente (em teste)
             const lastRoomId = localStorage.getItem("lastRoomId") || 0;
             const nextRoomId = Number(lastRoomId) + 1;
             setRoomDetails((prev) => ({ ...prev, id: nextRoomId }));
@@ -49,6 +47,12 @@ const RoomRegistration = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+
+        if (value < 0) {
+            alert("The value cannot be negative!");
+            return;
+        }
+    
         setRoomDetails({ ...roomDetails, [name]: value });
     };
 
@@ -60,25 +64,35 @@ const RoomRegistration = () => {
             return { ...prevState, options };
         });
     };
-
-    const handleSubmit = (e) => {
+ 
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Room Details Submitted:", roomDetails);
-        if (!isDatabaseConfigured) {
-            localStorage.setItem("lastRoomId", roomDetails.id);
+      
+        if (roomDetails.name.length < 3) {
+          alert("Room name must be at least 3 characters long.");
+          return;
         }
+      
+        if (roomDetails.beds < 1 || roomDetails.bathroom < 1 || roomDetails.capacity < 1 || roomDetails.size < 1) {
+          alert("No numeric field can be negative or zero.");
+          return;
+        }
+      
+        if (roomDetails.options.length === 0) {
+          alert("Please select at least one room option.");
+          return;
+        }
+      
+        try {
+          const response = await axios.post("http://localhost:5000/rooms", roomDetails);
+          alert(`Room registered successfully! Room Code: ${response.data.room.room_id}`);
+        } catch (error) {
+          console.error(error);
+          alert("Error registering room!");
+        }
+      };
 
-        alert(`Room registered successfully! Room Code: ${roomDetails.id}`);
-        setRoomDetails({
-            id: isDatabaseConfigured ? roomDetails.id + 1 : Number(localStorage.getItem("lastRoomId")) + 1,
-            name: "",
-            beds: "",
-            bathroom: "",
-            capacity: "",
-            size: "",
-            options: [],
-        });
-    };
+    
 
     return (
         <div className={styles.container}>

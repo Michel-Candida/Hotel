@@ -69,34 +69,34 @@ const UserUpdate = () => {
 
     const handleUpdateClient = async (e) => {
         e.preventDefault();
-
+    
         if (!clientCode) {
             alert("Please search for a client first.");
             return;
         }
-
+    
         // Limpa as mensagens antes de iniciar a atualização
         setErrorMessage('');
         setSuccessMessage('');
-
+    
         if (!validateEmail(formData.email)) {
             setErrorMessage("Invalid email format");
             return;
         }
-
+    
         if (!validatePhone(formData.phone)) {
             setErrorMessage("Phone number must contain only numbers");
             return;
         }
-
+    
         if (!validateDocument(formData.document)) {
             setErrorMessage("Document must contain only letters and numbers");
             return;
         }
-
+    
         try {
             const response = await axios.put(`http://localhost:5000/clients/${clientCode}`, formData);
-
+    
             if (response.status === 200) {
                 setSuccessMessage("Client updated successfully!"); // Define a mensagem de sucesso
             } else {
