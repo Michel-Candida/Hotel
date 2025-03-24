@@ -63,7 +63,6 @@ app.put("/clients/:clientCode", async (req, res) => {
       return res.status(404).json({ message: "Client not found" });
     }
 
-    // Verificar se o documento já existe (excluindo o cliente atual)
     const { rows: documentCheck } = await pool.query(
       "SELECT * FROM clients WHERE document = $1 AND client_code != $2",
       [document, clientCode]
@@ -135,108 +134,36 @@ app.get("/api/search", async (req, res) => {
   const filters = ["name", "document", "phone", "email"];
   const conditions = [];
   const values = [];
+
   filters.forEach((filter) => {
     if (req.query[filter]) {
-      conditions.push(`${filter} ILIKE $${conditions.length + 1}`);
-      values.push(`%${req.query[filter]}%`);
+      if (filter === "name") {
+        // Para nome, permitir busca parcial (case-insensitive)
+        conditions.push(`${filter} ILIKE $${conditions.length + 1}`);
+        values.push(`%${req.query[filter]}%`);
+      } else {
+        // Para document, phone e email, busca exata
+        conditions.push(`${filter} = $${conditions.length + 1}`);
+        values.push(req.query[filter]);
+      }
     }
   });
-  if (!conditions.length) return res.status(400).json({ error: "No search criteria provided" });
+
+  if (!conditions.length) {
+    return res.status(400).json({ error: "No search criteria provided" });
+  }
+
   try {
-    const { rows } = await pool.query(`SELECT * FROM clients WHERE ${conditions.join(" OR ")}`, values);
+    const { rows } = await pool.query(
+      `SELECT * FROM clients WHERE ${conditions.join(" OR ")}`,
+      values
+    );
     res.json(rows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });
   }
 });
-
-
-
-app.post("/checkin", async (req, res) => {
-  const { client_code, room_id, checkin_date, checkout_date, number_of_people, companions } = req.body;
-
-  console.log("Received data:", req.body);  // Log para verificar os dados recebidos
-
-  if (!client_code || !room_id || !checkin_date || !checkout_date || !number_of_people) {
-      console.log("Missing required fields:", req.body);
-      return res.status(400).json({ message: "Missing required fields." });
-  }
-
-  console.log("Validated data:", { client_code, room_id, checkin_date, checkout_date, number_of_people });
-
-  if (new Date(checkout_date) < new Date(checkin_date)) {
-      return res.status(400).json({ message: "Checkout date cannot be earlier than checkin date." });
-  }
-
-  if (typeof client_code !== 'number' || typeof room_id !== 'number' || typeof number_of_people !== 'number') {
-    return res.status(400).json({ message: "Invalid data types." });
-  }
-
-  // Validar companions
-  if (companions && Array.isArray(companions)) {
-    companions.forEach(companion => {
-        if (!companion.name || !companion.phone || !companion.document) {
-            return res.status(400).json({ message: "Each companion must have a name, phone, and document." });
-        }
-    });
-  }
-
-  // Verifique se o número de pessoas corresponde ao número de acompanhantes + 1 para o cliente
-  if (number_of_people !== (companions ? companions.length + 1 : 1)) {
-      return res.status(400).json({ message: "Number of people does not match the companions list." });
-  }
-
-  try {
-      const roomAvailability = await checkRoomAvailability(room_id, checkin_date, checkout_date);
-      if (!roomAvailability.available) {
-          return res.status(400).json({ message: roomAvailability.message });
-      }
-
-      const query = `
-          INSERT INTO reservations (client_code, room_id, checkin_date, checkout_date, number_of_people)
-          VALUES ($1, $2, $3, $4, $5) RETURNING id
-      `;
-      const values = [client_code, room_id, checkin_date, checkout_date, number_of_people];
-      const result = await pool.query(query, values);
-      const reservationId = result.rows[0].id;
-
-      res.status(201).json({ message: "Check-in successfully completed!" });
-  } catch (error) {
-      console.error("Error during check-in:", error);
-      res.status(500).json({ message: "Internal server error. Please try again later.", error: error.message });
-  }
-});
-
-
-
-// Função para verificar a disponibilidade do quarto (essa lógica pode ser customizada)
-const checkRoomAvailability = async (room_id, checkin_date, checkout_date) => {
-  try {
-    const { rows: reservationRows } = await pool.query(
-      `SELECT * FROM reservations WHERE room_id = $1
-      AND (
-        (checkin_date < $2 AND checkout_date > $2) OR  -- O quarto está reservado durante o check-in
-        (checkin_date < $3 AND checkout_date > $3) OR  -- O quarto está reservado durante o checkout
-        (checkin_date >= $2 AND checkout_date <= $3)    -- O quarto já está reservado para todo o período
-      )`,
-      [room_id, checkin_date, checkout_date]
-    );
-
-    if (reservationRows.length > 0) {
-      return { available: false, message: "The room is already booked during this period." };
-    } else {
-      return { available: true, message: "The room is available." };
-    }
-  } catch (error) {
-    console.error("Error while checking room availability:", error);
-    throw new Error("Error while checking room availability.");
-  }
-};
-
-
-
-
 
 app.post('/users', async (req, res) => {
   try {
