@@ -151,109 +151,92 @@ app.get("/api/search", async (req, res) => {
   }
 });
 
-// Route to fetch a reservation by client code
-app.get("/reservas/:clientCode", async (req, res) => {
-  try {
-    const { clientCode } = req.params;
 
-    
-    const { rows: checkinRows } = await pool.query(
-      "SELECT * FROM checkins WHERE client_code = $1 ORDER BY checkin_date DESC LIMIT 1",
-      [clientCode]
-    );
-    if (checkinRows.length === 0) {
-      return res.status(404).json({ message: "Reservation not found" });
-    }
 
-    const checkinData = checkinRows[0];
-    
-    const { rows: companionsRows } = await pool.query(
-      "SELECT * FROM companions WHERE checkin_id = $1",
-      [checkinData.checkin_id]
-    );
-
-    res.json({
-      checkinData,
-      companions: companionsRows,
-    });
-  } catch (error) {
-    console.error("Error fetching reservation:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// Route to handle check-in
 app.post("/checkin", async (req, res) => {
-  const { clientCode, roomNumber, checkInDate, checkOutDate, numberOfPeople, companions } = req.body;
+  const { client_code, room_id, checkin_date, checkout_date, number_of_people, companions } = req.body;
 
-  // Verifique se os dados necessários estão presentes
-  if (!clientCode || !roomNumber || !checkInDate || !checkOutDate || !numberOfPeople) {
-    return res.status(400).json({ message: "Missing required fields." });
+  console.log("Received data:", req.body);  // Log para verificar os dados recebidos
+
+  if (!client_code || !room_id || !checkin_date || !checkout_date || !number_of_people) {
+      console.log("Missing required fields:", req.body);
+      return res.status(400).json({ message: "Missing required fields." });
+  }
+
+  console.log("Validated data:", { client_code, room_id, checkin_date, checkout_date, number_of_people });
+
+  if (new Date(checkout_date) < new Date(checkin_date)) {
+      return res.status(400).json({ message: "Checkout date cannot be earlier than checkin date." });
+  }
+
+  if (typeof client_code !== 'number' || typeof room_id !== 'number' || typeof number_of_people !== 'number') {
+    return res.status(400).json({ message: "Invalid data types." });
+  }
+
+  // Validar companions
+  if (companions && Array.isArray(companions)) {
+    companions.forEach(companion => {
+        if (!companion.name || !companion.phone || !companion.document) {
+            return res.status(400).json({ message: "Each companion must have a name, phone, and document." });
+        }
+    });
+  }
+
+  // Verifique se o número de pessoas corresponde ao número de acompanhantes + 1 para o cliente
+  if (number_of_people !== (companions ? companions.length + 1 : 1)) {
+      return res.status(400).json({ message: "Number of people does not match the companions list." });
   }
 
   try {
-    // Verificar se o cliente existe
-    const { rows: clientRows } = await pool.query(
-      "SELECT * FROM clients WHERE client_code = $1",
-      [clientCode]
-    );
-    if (clientRows.length === 0) {
-      return res.status(404).json({ message: "Client not found" });
-    }
-
-    // Inserir o check-in
-    const { rows: checkInRows } = await pool.query(
-      "INSERT INTO checkins (client_code, room_number, checkin_date, checkout_date, number_of_people) VALUES ($1, $2, $3, $4, $5) RETURNING checkin_id",
-      [clientCode, roomNumber, checkInDate, checkOutDate, numberOfPeople]
-    );
-
-    const checkinId = checkInRows[0].checkin_id;
-
-    // Inserir os acompanhantes, se houver
-    if (companions && Array.isArray(companions)) {
-      for (const companion of companions) {
-        await pool.query(
-          "INSERT INTO companions (client_code, name, phone, document) VALUES ($1, $2, $3, $4)",
-          [clientCode, companion.name, companion.phone, companion.document]
-        );
+      const roomAvailability = await checkRoomAvailability(room_id, checkin_date, checkout_date);
+      if (!roomAvailability.available) {
+          return res.status(400).json({ message: roomAvailability.message });
       }
-    }
 
-    res.status(200).json({ message: "Check-in and companions added successfully!" });
-  } catch (error) {
-    console.error("Error during check-in:", error);
-    res.status(500).json({ message: "Server error during check-in", error: error.message });
-  }
-});
-
-app.get('/check-room-availability', async (req, res) => {
-  const { room_id, checkin_date, checkout_date } = req.query;
-
-  try {
-      // Consulta no banco para verificar se já existe uma reserva no intervalo de datas
       const query = `
-          SELECT * FROM reservations
-          WHERE room_id = $1
-          AND (
-              (checkin_date < $2 AND checkout_date > $2) OR
-              (checkin_date < $3 AND checkout_date > $3)
-          );
+          INSERT INTO reservations (client_code, room_id, checkin_date, checkout_date, number_of_people)
+          VALUES ($1, $2, $3, $4, $5) RETURNING id
       `;
-      const values = [room_id, checkin_date, checkout_date];
+      const values = [client_code, room_id, checkin_date, checkout_date, number_of_people];
       const result = await pool.query(query, values);
+      const reservationId = result.rows[0].id;
 
-      if (result.rows.length > 0) {
-          // O quarto está ocupado durante o período
-          return res.json({ available: false });
-      }
-
-      // O quarto está disponível
-      return res.json({ available: true });
+      res.status(201).json({ message: "Check-in successfully completed!" });
   } catch (error) {
-      console.error("Error checking room availability:", error);
-      return res.status(500).send("Error checking room availability.");
+      console.error("Error during check-in:", error);
+      res.status(500).json({ message: "Internal server error. Please try again later.", error: error.message });
   }
 });
+
+
+
+// Função para verificar a disponibilidade do quarto (essa lógica pode ser customizada)
+const checkRoomAvailability = async (room_id, checkin_date, checkout_date) => {
+  try {
+    const { rows: reservationRows } = await pool.query(
+      `SELECT * FROM reservations WHERE room_id = $1
+      AND (
+        (checkin_date < $2 AND checkout_date > $2) OR  -- O quarto está reservado durante o check-in
+        (checkin_date < $3 AND checkout_date > $3) OR  -- O quarto está reservado durante o checkout
+        (checkin_date >= $2 AND checkout_date <= $3)    -- O quarto já está reservado para todo o período
+      )`,
+      [room_id, checkin_date, checkout_date]
+    );
+
+    if (reservationRows.length > 0) {
+      return { available: false, message: "The room is already booked during this period." };
+    } else {
+      return { available: true, message: "The room is available." };
+    }
+  } catch (error) {
+    console.error("Error while checking room availability:", error);
+    throw new Error("Error while checking room availability.");
+  }
+};
+
+
+
+
 
 app.post('/users', async (req, res) => {
   try {
