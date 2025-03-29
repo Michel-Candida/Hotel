@@ -188,6 +188,7 @@ const CheckIn = () => {
                         value={formData.client_code}
                         onChange={handleClientCodeChange}
                         required
+                        autoComplete="off"
                     />
                 </div>
 
@@ -222,6 +223,7 @@ const CheckIn = () => {
                                 value={formData.room_id}
                                 onChange={handleRoomNumberChange}
                                 required
+                                autoComplete="off"
                             />
                         </div>
 
@@ -233,6 +235,7 @@ const CheckIn = () => {
                                 value={formData.checkin_date}
                                 onChange={handleCheckinDateChange}
                                 required
+                                autoComplete="off"
                             />
                         </div>
 
@@ -244,6 +247,7 @@ const CheckIn = () => {
                                 value={formData.checkout_date}
                                 onChange={handleCheckoutDateChange}
                                 required
+                                autoComplete="off"
                             />
                         </div>
                     </>
@@ -273,6 +277,7 @@ const CheckIn = () => {
                                 value={companion.name}
                                 onChange={(e) => handleCompanionChange(index, e)}
                                 required
+                                autoComplete="off"
                             />
                         </div>
                         <div>
@@ -283,6 +288,7 @@ const CheckIn = () => {
                                 value={companion.phone}
                                 onChange={(e) => handleCompanionChange(index, e)}
                                 required
+                                autoComplete="off"
                             />
                         </div>
                         <div>
@@ -293,6 +299,7 @@ const CheckIn = () => {
                                 value={companion.document}
                                 onChange={(e) => handleCompanionChange(index, e)}
                                 required
+                                autoComplete="off"
                             />
                         </div>
                     </div>

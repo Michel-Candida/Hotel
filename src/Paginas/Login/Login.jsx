@@ -42,6 +42,7 @@ const Login = () => {
               value={loginName}
               onChange={(e) => setLoginName(e.target.value)}
               required
+              autoComplete="off"
             />
           </div>
 
@@ -53,6 +54,7 @@ const Login = () => {
               value={loginPassword}
               onChange={(e) => setLoginPassword(e.target.value)}
               required
+              autoComplete="off"
             />
           </div>
 

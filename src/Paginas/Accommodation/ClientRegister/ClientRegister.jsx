@@ -104,6 +104,7 @@ const ClientRegister = () => {
             placeholder="Auto-generated code"
             value={formData.client_code || 'Generating...'}
             readOnly
+            autoComplete="off"
           />
         </div>
 
@@ -116,6 +117,7 @@ const ClientRegister = () => {
             value={formData.name}
             onChange={handleChange}
             required
+            autoComplete="off"
           />
         </div>
 
@@ -128,6 +130,7 @@ const ClientRegister = () => {
             value={formData.email}
             onChange={handleChange}
             required
+            autoComplete="off"
           />
         </div>
 
@@ -140,6 +143,7 @@ const ClientRegister = () => {
             value={formData.phone}
             onChange={handleChange}
             required
+            autoComplete="off"
           />
         </div>
 
@@ -152,6 +156,7 @@ const ClientRegister = () => {
             value={formData.document}
             onChange={handleChange}
             required
+            autoComplete="off"
           />
         </div>
         <button type="submit" className="user-register-button">Register</button>

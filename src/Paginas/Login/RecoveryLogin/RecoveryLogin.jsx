@@ -27,6 +27,7 @@ const RecoveryLogin = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
+                        autoComplete="off"
                     />
                 </label>
                 <button type="submit">Send</button>

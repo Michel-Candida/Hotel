@@ -121,6 +121,7 @@ const UserUpdate = () => {
                     value={clientCode} 
                     onChange={(e) => setClientCode(e.target.value)} 
                     placeholder="Enter client code"
+                    autoComplete="off"
                 />
                 <button 
                     className="user-update-search-button" 
@@ -144,6 +145,7 @@ const UserUpdate = () => {
                         onChange={handleChange} 
                         required 
                         placeholder="Enter full name"
+                        autoComplete="off"
                     />
                 </div>
                 <div>
@@ -155,6 +157,7 @@ const UserUpdate = () => {
                         onChange={handleChange} 
                         required 
                         placeholder="Enter email address"
+                        autoComplete="off"
                     />
                 </div>
                 <div>
@@ -166,6 +169,7 @@ const UserUpdate = () => {
                         onChange={handleChange} 
                         required 
                         placeholder="Enter phone number"
+                        autoComplete="off"
                     />
                 </div>
                 <div>
@@ -177,6 +181,7 @@ const UserUpdate = () => {
                         onChange={handleChange} 
                         required 
                         placeholder="Enter document (letters and numbers only)"
+                        autoComplete="off"
                     />
                 </div>
                 <button type="submit">Update Client</button>

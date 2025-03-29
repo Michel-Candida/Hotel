@@ -74,6 +74,7 @@ const SearchUser = () => {
                             placeholder={`Enter the ${searchType}`}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
+                            autoComplete="off"
                         />
                         <button className="search-user-button" onClick={handleSearch}>Search</button>
                     </div>

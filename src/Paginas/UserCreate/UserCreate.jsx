@@ -52,6 +52,7 @@ const UserCreate = () => {
                         value={newUser[field]}
                         onChange={handleInputChange}
                         className="input-field"
+                        autoComplete="off"
                     />
                 ))}
                 <button onClick={handleAddUser} className="add-button">

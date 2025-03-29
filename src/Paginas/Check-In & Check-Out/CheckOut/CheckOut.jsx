@@ -76,6 +76,7 @@ const CheckOut = () => {
                         onChange={handleClientCodeChange}
                         required
                         disabled={loading}
+                        autoComplete="off"
                     />
                 </div>
                 {loading && <p>Loading reservation details...</p>}

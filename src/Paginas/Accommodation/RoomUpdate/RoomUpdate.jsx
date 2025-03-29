@@ -105,6 +105,7 @@ const RoomUpdate = () => {
                     value={roomCode}
                     onChange={(e) => setRoomCode(e.target.value)}
                     className={styles.input}
+                    autoComplete="off"
                 />
                 <button onClick={fetchRoomData} className={styles.button}>
                     {loading ? "Searching..." : "Search"}
@@ -135,6 +136,7 @@ const RoomUpdate = () => {
                                 onChange={handleInputChange}
                                 required
                                 className={styles.input}
+                                autoComplete="off"
                             />
                         </div>
                     ))}
@@ -148,6 +150,7 @@ const RoomUpdate = () => {
                                         type="checkbox"
                                         checked={roomDetails.options.includes(option)}
                                         onChange={() => handleOptionChange(option)}
+                                        autoComplete="off"
                                     />
                                     {option}
                                 </label>

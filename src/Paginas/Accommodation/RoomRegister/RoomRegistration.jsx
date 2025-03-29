@@ -119,6 +119,7 @@ const RoomRegistration = () => {
                             onChange={handleInputChange}
                             required
                             className={styles.input}
+                            autoComplete="off"
                         />
                     </div>
                 ))}
@@ -132,6 +133,7 @@ const RoomRegistration = () => {
                                     type="checkbox"
                                     checked={roomDetails.options.includes(option)}
                                     onChange={() => handleOptionChange(option)}
+                                    autoComplete="off"
                                 />
                                 {option}
                             </label>
