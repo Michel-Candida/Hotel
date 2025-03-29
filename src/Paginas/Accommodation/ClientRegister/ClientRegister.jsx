@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './ClientRegister.css';
 
 const ClientRegister = () => {
-
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     client_code: '',
     name: '',
@@ -93,78 +94,88 @@ const ClientRegister = () => {
   };
 
   return (
-    <div className="user-register-container">
-      <h2 className="user-register-title">Client Registration</h2>
-      <form onSubmit={handleSubmit} className="user-register-form">
-        <div>
-          <label>Client Code:</label>
-          <input
-            type="text"
-            name="client_code"
-            placeholder="Auto-generated code"
-            value={formData.client_code || 'Generating...'}
-            readOnly
-            autoComplete="off"
-          />
+    <div className='Main-Container-Register-Client'>
+      <div className="user-register-container">
+        <div className="header-Register-back">
+            <button 
+              onClick={() => navigate('/MainMenu')} 
+              className="Rc-back-button"
+            >
+              &larr; Menu
+            </button>
+          <h2>Client Registration</h2>
         </div>
+        <form onSubmit={handleSubmit} className="user-register-form">
+          <div>
+            <label>Client Code:</label>
+            <input
+              type="text"
+              name="client_code"
+              placeholder="Auto-generated code"
+              value={formData.client_code || 'Generating...'}
+              readOnly
+              autoComplete="off"
+            />
+          </div>
 
-        <div>
-          <label>Name:</label>
-          <input
-            type="text"
-            name="name"
-            placeholder="Enter full name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            autoComplete="off"
-          />
-        </div>
+          <div>
+            <label>Name:</label>
+            <input
+              type="text"
+              name="name"
+              placeholder="Enter full name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              autoComplete="off"
+            />
+          </div>
 
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            name="email"
-            placeholder="Enter email address"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            autoComplete="off"
-          />
-        </div>
+          <div>
+            <label>Email:</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="Enter email address"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              autoComplete="off"
+            />
+          </div>
 
-        <div>
-          <label>Phone:</label>
-          <input
-            type="text"
-            name="phone"
-            placeholder="Enter phone number"
-            value={formData.phone}
-            onChange={handleChange}
-            required
-            autoComplete="off"
-          />
-        </div>
+          <div>
+            <label>Phone:</label>
+            <input
+              type="text"
+              name="phone"
+              placeholder="Enter phone number"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+              autoComplete="off"
+            />
+          </div>
 
-        <div>
-          <label>Document:</label>
-          <input
-            type="text"
-            name="document"
-            placeholder="Enter document (e.g., Passport, ID)"
-            value={formData.document}
-            onChange={handleChange}
-            required
-            autoComplete="off"
-          />
-        </div>
-        <button type="submit" className="user-register-button">Register</button>
-      </form>
+          <div>
+            <label>Document:</label>
+            <input
+              type="text"
+              name="document"
+              placeholder="Enter document (e.g., Passport, ID)"
+              value={formData.document}
+              onChange={handleChange}
+              required
+              autoComplete="off"
+            />
+          </div>
+          <button type="submit" className="user-register-button">Register</button>
+        </form>
 
-      {errorMessage && <div className="error-message">{errorMessage}</div>}
+        {errorMessage && <div className="error-message">{errorMessage}</div>}
 
-      {successMessage && <div className="success-message">{successMessage}</div>}
+        {successMessage && <div className="success-message">{successMessage}</div>}
+      </div>
     </div>
   );
 };

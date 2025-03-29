@@ -1,20 +1,4 @@
-/* Reset básico */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
-}
 
-/* Ajuste no background para melhor visualização */
-body {
-    background-color: #f8f9fa;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    padding: 20px;
-}
 
 /* Container centralizado */
 .recovery-container {

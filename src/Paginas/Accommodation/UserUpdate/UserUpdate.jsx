@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './UserUpdate.css';
 
 const UserUpdate = () => {
     const [clientCode, setClientCode] = useState('');
+    const navigate = useNavigate();
+    
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -114,7 +117,16 @@ const UserUpdate = () => {
 
     return (
         <div className="user-update-container">
-            <h2>Client Update</h2>
+            <div className="Update-Register-back">
+                <button 
+                    onClick={() => navigate('/MainMenu')} 
+                    className="Update-back-button"
+                >
+                    &larr; Menu
+                </button>
+                <h2>Client Update</h2>
+            </div>
+            
             <div className="user-update-search">
                 <input 
                     type="text" 

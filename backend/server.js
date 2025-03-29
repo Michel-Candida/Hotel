@@ -89,79 +89,105 @@ app.post("/clients", async (req, res) => {
   const { name, email, phone, document } = req.body;
   
   try {
-    // Verificar se o email já existe
-    const { rows: emailCheck } = await pool.query(
-      "SELECT * FROM clients WHERE email = $1",
-      [email]
-    );
-    
-    // Verificar se o documento já existe
-    const { rows: documentCheck } = await pool.query(
-      "SELECT * FROM clients WHERE document = $1",
-      [document]
-    );
-    
-    // Se ambos já existem, retornar erro específico
-    if (emailCheck.length && documentCheck.length) {
-      return res.status(400).json({ message: "Email and Document already exist" });
-    }
-    
-    // Se apenas o email já existe
-    if (emailCheck.length) {
-      return res.status(400).json({ message: "Email already exists" });
-    }
-    
-    // Se apenas o documento já existe
-    if (documentCheck.length) {
-      return res.status(400).json({ message: "Document already exists" });
-    }
-    
-    // Inserir o novo cliente no banco de dados
+    // Gerar client_code automático (ex: CLI+timestamp)
+    const clientCode = 'CLI' + Date.now().toString().slice(-6);
+
     const { rows } = await pool.query(
-      "INSERT INTO clients (name, email, phone, document) VALUES ($1, $2, $3, $4) RETURNING client_code, name, email, phone, document",
-      [name, email, phone, document]
+      "INSERT INTO clients (client_code, name, email, phone, document) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      [clientCode, name, email, phone, document]
     );
     
     res.status(201).json({ message: "Client registered successfully", client: rows[0] });
   } catch (error) {
-    console.error('Error registering client:', error); // Log do erro detalhado
-    res.status(500).json({ message: "Server error", error: error.message }); // Inclui o erro no retorno
+    console.error('Error registering client:', error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
 // Search Clients
-app.get("/api/search", async (req, res) => {
-  const filters = ["name", "document", "phone", "email"];
-  const conditions = [];
-  const values = [];
+app.get("/api/clients/search", async (req, res) => {
+  const validFilters = ["name", "document", "phone", "email", "client_code"];
+  const { ...queryParams } = req.query;
 
-  filters.forEach((filter) => {
-    if (req.query[filter]) {
-      if (filter === "name") {
-        // Para nome, permitir busca parcial (case-insensitive)
-        conditions.push(`${filter} ILIKE $${conditions.length + 1}`);
-        values.push(`%${req.query[filter]}%`);
-      } else {
-        // Para document, phone e email, busca exata
-        conditions.push(`${filter} = $${conditions.length + 1}`);
-        values.push(req.query[filter]);
-      }
-    }
+  // Validação dos parâmetros
+  const filters = Object.keys(queryParams).filter(param => {
+    if (!validFilters.includes(param)) return false;
+    const value = queryParams[param]?.toString().trim();
+    return value && value.length > 0;
   });
 
-  if (!conditions.length) {
-    return res.status(400).json({ error: "No search criteria provided" });
+  if (!filters.length) {
+    return res.status(400).json({ 
+      error: "Parâmetros de busca inválidos",
+      valid_filters: validFilters,
+      example: "/api/clients/search?name=Maria&document=123.456.789-00"
+    });
   }
 
   try {
-    const { rows } = await pool.query(
-      `SELECT * FROM clients WHERE ${conditions.join(" OR ")}`,
-      values
-    );
-    res.json(rows);
+    const conditions = [];
+    const values = [];
+    
+    filters.forEach((filter, index) => {
+      const paramIndex = index + 1;
+      const searchTerm = queryParams[filter].trim();
+      
+      if (filter === "name") {
+        // Busca por partes do nome (case insensitive)
+        conditions.push(`name ILIKE $${paramIndex}`);
+        values.push(`%${searchTerm}%`);
+      } 
+      else if (filter === "client_code") {
+        // Busca exata por código
+        conditions.push(`client_code = $${paramIndex}`);
+        values.push(searchTerm);
+      }
+      else {
+        // Busca exata para outros campos
+        conditions.push(`${filter} = $${paramIndex}`);
+        values.push(searchTerm);
+      }
+    });
+
+    const query = {
+      text: `SELECT 
+              client_id,
+              client_code,
+              name,
+              document,
+              phone,
+              email,
+              TO_CHAR(created_at, 'DD/MM/YYYY') as registration_date
+             FROM clients 
+             WHERE ${conditions.join(" OR ")}
+             ORDER BY name ASC
+             LIMIT 100`,
+      values: values
+    };
+
+    const { rows } = await pool.query(query);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Nenhum cliente encontrado com os critérios fornecidos",
+        search_params: queryParams,
+        suggestion: "Verifique a ortografia ou tente critérios mais amplos"
+      });
+    }
+
+    res.json({
+      success: true,
+      count: rows.length,
+      data: rows
+    });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Server error" });
+    console.error("Database error:", error);
+    res.status(500).json({
+      error: "Erro no servidor",
+      details: process.env.NODE_ENV === "development" ? error.message : undefined
+    });
   }
 });
 
@@ -233,31 +259,53 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// Route to register a new room
+/// Route to register a new room
 app.post("/rooms", async (req, res) => {
-  const { name, beds, bathroom, capacity, size, options } = req.body;
+  const { number_room, name, type_room, category_room, beds, size, options } = req.body;
   
   const formattedOptions = options && Array.isArray(options) ? options : [];
 
   try {
+    // Verificar se o número do quarto já existe
+    const existingRoom = await pool.query(
+      "SELECT * FROM rooms WHERE number_room = $1",
+      [number_room]
+    );
+
+    if (existingRoom.rows.length > 0) {
+      return res.status(400).json({ message: "Room number already exists" });
+    }
+
     const { rows } = await pool.query(
-      "INSERT INTO rooms (name, beds, bathroom, capacity, size, options) VALUES ($1, $2, $3, $4, $5, $6) RETURNING room_id",
-      [name, beds, bathroom, capacity, size, formattedOptions]
+      `INSERT INTO rooms 
+       (number_room, name, type_room, category_room, beds, size, options) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7) 
+       RETURNING number_room, name, type_room, category_room`,
+      [number_room, name, type_room, category_room, beds, size, formattedOptions]
     );
     
-    res.status(201).json({ message: "Room registered successfully", room: rows[0] });
+    res.status(201).json({ 
+      message: "Room registered successfully", 
+      room: rows[0] 
+    });
   } catch (error) {
     console.error("Error registering room:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ 
+      message: "Server error",
+      details: process.env.NODE_ENV === "development" ? error.message : undefined
+    });
   }
 });
 
-// Fetch room data by room_id
-app.get('/api/rooms/:roomId', async (req, res) => {
-  const { roomId } = req.params;  
+// Fetch room data by number_room
+app.get('/api/rooms/:numberRoom', async (req, res) => {
+  const { numberRoom } = req.params;  
   
   try {
-      const { rows } = await pool.query('SELECT * FROM rooms WHERE room_id = $1', [roomId]);  
+      const { rows } = await pool.query(
+        'SELECT * FROM rooms WHERE number_room = $1', 
+        [numberRoom]
+      );  
       
       if (rows.length === 0) {
           return res.status(404).json({ message: "Room not found" });
@@ -271,27 +319,32 @@ app.get('/api/rooms/:roomId', async (req, res) => {
 });
 
 // Update room details
-app.put("/api/rooms/:roomId", async (req, res) => {  
-  const { roomId } = req.params; 
-  const { name, beds, bathroom, capacity, size, options } = req.body;
+app.put("/api/rooms/:numberRoom", async (req, res) => {  
+  const { numberRoom } = req.params; 
+  const { name, type_room, category_room, beds, size, options } = req.body;
 
   try {
-    // Check if room exists
-    const { rows: existingRoom } = await pool.query(
-      "SELECT * FROM rooms WHERE room_id = $1",  
-      [roomId]
+    const { rows } = await pool.query(
+      `UPDATE rooms SET 
+        name = $1, 
+        type_room = $2, 
+        category_room = $3, 
+        beds = $4, 
+        size = $5, 
+        options = $6 
+       WHERE number_room = $7 
+       RETURNING number_room, name, type_room, category_room`,
+      [name, type_room, category_room, beds, size, options, numberRoom]
     );
 
-    if (existingRoom.length === 0) {
+    if (rows.length === 0) {
       return res.status(404).json({ message: "Room not found" });
     }
 
-    const { rows } = await pool.query(
-      "UPDATE rooms SET name = $1, beds = $2, bathroom = $3, capacity = $4, size = $5, options = $6 WHERE room_id = $7 RETURNING *",  // Alteração para room_id
-      [name, beds, bathroom, capacity, size, options, roomId]
-    );
-
-    res.status(200).json({ message: "Room updated successfully", room: rows[0] });
+    res.status(200).json({ 
+      message: "Room updated successfully", 
+      room: rows[0] 
+    });
   } catch (error) {
     console.error("Error updating room:", error);
     res.status(500).json({ message: "Server error" });

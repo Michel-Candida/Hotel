@@ -22,16 +22,15 @@ CREATE TABLE IF NOT EXISTS clients (
 
 -- Tabela rooms (com verificação de existência)
 CREATE TABLE IF NOT EXISTS rooms (
-    room_id SERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
+    number_room VARCHAR(10) UNIQUE NOT NULL,
     name VARCHAR(100) NOT NULL,
+    type_room VARCHAR(20) NOT NULL CHECK (type_room IN ('Single room', 'Double room', 'Triple room', 'Quadruple room')),
+    category_room VARCHAR(20) NOT NULL CHECK (category_room IN ('Main house', 'Garden', 'Tower 1', 'Tower 2')),
     beds INT NOT NULL,
-    bathroom VARCHAR(50) NOT NULL,
-    capacity INT NOT NULL,
     size VARCHAR(20) NOT NULL,
     options TEXT[],
     status VARCHAR(20) DEFAULT 'available',
-    price_per_night DECIMAL(10,2) NOT NULL,
-    description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -4,17 +4,17 @@ import axios from "axios";
 
 const RoomRegistration = () => {
     const [roomDetails, setRoomDetails] = useState({
-        id: "",
+        number_room: "",
         name: "",
+        type_room: "",
+        category_room: "",
         beds: "",
-        bathroom: "",
-        capacity: "",
         size: "",
         options: [],
     });
     
-    const isDatabaseConfigured = true;
-
+    const roomTypes = ["Single room", "Double room", "Triple room", "Quadruple room"];
+    const roomCategories = ["Main house", "Garden", "Tower 1", "Tower 2"];
     const roomOptions = [
         "Double Bed",
         "Twin Bed",
@@ -30,29 +30,8 @@ const RoomRegistration = () => {
         "Non-Smoking",
     ];
 
-    useEffect(() => {
-        if (isDatabaseConfigured) {
-            const fetchLastRoomIdFromDatabase = async () => {
-                const lastRoomId = 100;
-                setRoomDetails((prev) => ({ ...prev, id: lastRoomId + 1 }));
-            };
-
-            fetchLastRoomIdFromDatabase();
-        } else {
-            const lastRoomId = localStorage.getItem("lastRoomId") || 0;
-            const nextRoomId = Number(lastRoomId) + 1;
-            setRoomDetails((prev) => ({ ...prev, id: nextRoomId }));
-        }
-    }, []);
-
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-
-        if (value < 0) {
-            alert("The value cannot be negative!");
-            return;
-        }
-    
         setRoomDetails({ ...roomDetails, [name]: value });
     };
 
@@ -73,8 +52,13 @@ const RoomRegistration = () => {
           return;
         }
       
-        if (roomDetails.beds < 1 || roomDetails.bathroom < 1 || roomDetails.capacity < 1 || roomDetails.size < 1) {
-          alert("No numeric field can be negative or zero.");
+        if (!roomDetails.number_room) {
+          alert("Please enter a room number.");
+          return;
+        }
+      
+        if (roomDetails.beds < 1 || roomDetails.size < 1) {
+          alert("Number of beds and room size must be positive values.");
           return;
         }
       
@@ -85,29 +69,30 @@ const RoomRegistration = () => {
       
         try {
           const response = await axios.post("http://localhost:5000/rooms", roomDetails);
-          alert(`Room registered successfully! Room Code: ${response.data.room.room_id}`);
+          alert(`Room registered successfully! Room Number: ${response.data.room.number_room}`);
+          setRoomDetails({
+            number_room: "",
+            name: "",
+            type_room: "",
+            category_room: "",
+            beds: "",
+            size: "",
+            options: [],
+          });
         } catch (error) {
           console.error(error);
-          alert("Error registering room!");
+          alert("Error registering room: " + (error.response?.data?.message || error.message));
         }
-      };
-
-    
+    };
 
     return (
         <div className={styles.container}>
             <h1 className={styles.title}>Room Registration</h1>
             <form onSubmit={handleSubmit}>
-                <div className={styles.formGroup}>
-                    <label className={styles.label}>Room Code (Auto-generated)</label>
-                    <input type="text" value={roomDetails.id} disabled className={styles.input} />
-                </div>
-
                 {[ 
+                    { label: "Room Number", name: "number_room", type: "text" },
                     { label: "Room Name", name: "name", type: "text" },
                     { label: "Number of Beds", name: "beds", type: "number" },
-                    { label: "Number of Bathrooms", name: "bathroom", type: "number" },
-                    { label: "Capacity (People)", name: "capacity", type: "number" },
                     { label: "Room Size (m²)", name: "size", type: "number" },
                 ].map(({ label, name, type }) => (
                     <div key={name} className={styles.formGroup}>
@@ -120,9 +105,42 @@ const RoomRegistration = () => {
                             required
                             className={styles.input}
                             autoComplete="off"
+                            min={type === "number" ? "1" : undefined}
                         />
                     </div>
                 ))}
+
+                    <div className={styles.formGroup}>
+                        <label className={styles.label}>Type of Room</label>
+                        <select
+                            name="type_room"
+                            value={roomDetails.type_room}
+                            onChange={handleInputChange}
+                            className={styles.input}
+                            required
+                        >
+                            <option value="" disabled hidden>Select a room type</option>
+                            {roomTypes.map(type => (
+                                <option key={type} value={type}>{type}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className={styles.formGroup}>
+                        <label className={styles.label}>Category of Room</label>
+                        <select
+                            name="category_room"
+                            value={roomDetails.category_room}
+                            onChange={handleInputChange}
+                            className={styles.input}
+                            required
+                        >
+                            <option value="" disabled hidden>Select a category</option>
+                            {roomCategories.map(category => (
+                                <option key={category} value={category}>{category}</option>
+                            ))}
+                        </select>
+                    </div>
 
                 <div className={styles.formGroup}>
                     <label className={styles.label}>Room Options:</label>
