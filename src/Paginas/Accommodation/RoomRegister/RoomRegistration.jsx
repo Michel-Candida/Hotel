@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styles from "./RoomRegistration.module.css";
 import axios from "axios";
 
@@ -12,7 +12,16 @@ const RoomRegistration = () => {
         size: "",
         options: [],
     });
-    
+
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+
+    const api = axios.create({
+        baseURL: "http://localhost:5000/api",
+        timeout: 10000
+    });
+
     const roomTypes = ["Single room", "Double room", "Triple room", "Quadruple room"];
     const roomCategories = ["Main house", "Garden", "Tower 1", "Tower 2"];
     const roomOptions = [
@@ -33,6 +42,8 @@ const RoomRegistration = () => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setRoomDetails({ ...roomDetails, [name]: value });
+        setError("");
+        setSuccess("");
     };
 
     const handleOptionChange = (option) => {
@@ -42,59 +53,87 @@ const RoomRegistration = () => {
                 : [...prevState.options, option];
             return { ...prevState, options };
         });
+        setError("");
+        setSuccess("");
     };
- 
+
+    const validateForm = () => {
+        if (roomDetails.name.length < 3) {
+            setError("Room name must be at least 3 characters long.");
+            return false;
+        }
+
+        if (!roomDetails.number_room) {
+            setError("Please enter a room number.");
+            return false;
+        }
+
+        if (roomDetails.beds < 1 || roomDetails.size < 1) {
+            setError("Number of beds and room size must be positive values.");
+            return false;
+        }
+
+        if (!roomDetails.type_room || !roomDetails.category_room) {
+            setError("Please select room type and category.");
+            return false;
+        }
+
+        if (roomDetails.options.length === 0) {
+            setError("Please select at least one room option.");
+            return false;
+        }
+
+        return true;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-      
-        if (roomDetails.name.length < 3) {
-          alert("Room name must be at least 3 characters long.");
-          return;
-        }
-      
-        if (!roomDetails.number_room) {
-          alert("Please enter a room number.");
-          return;
-        }
-      
-        if (roomDetails.beds < 1 || roomDetails.size < 1) {
-          alert("Number of beds and room size must be positive values.");
-          return;
-        }
-      
-        if (roomDetails.options.length === 0) {
-          alert("Please select at least one room option.");
-          return;
-        }
-      
+        
+        if (!validateForm()) return;
+
+        setLoading(true);
+        setError("");
+        setSuccess("");
+
         try {
-          const response = await axios.post("http://localhost:5000/rooms", roomDetails);
-          alert(`Room registered successfully! Room Number: ${response.data.room.number_room}`);
-          setRoomDetails({
-            number_room: "",
-            name: "",
-            type_room: "",
-            category_room: "",
-            beds: "",
-            size: "",
-            options: [],
-          });
+            const response = await api.post("/rooms", roomDetails);
+            
+            setSuccess(`Room ${response.data.room.number_room} registered successfully!`);
+            setRoomDetails({
+                number_room: "",
+                name: "",
+                type_room: "",
+                category_room: "",
+                beds: "",
+                size: "",
+                options: [],
+            });
         } catch (error) {
-          console.error(error);
-          alert("Error registering room: " + (error.response?.data?.message || error.message));
+            console.error("Registration error:", error);
+            if (error.response?.data?.message?.includes("already exists")) {
+                setError(`Room number ${roomDetails.number_room} already exists.`);
+            } else {
+                setError(error.response?.data?.message || "Error registering room. Please try again.");
+            }
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
         <div className={styles.container}>
             <h1 className={styles.title}>Room Registration</h1>
+            
+            {error && <div className={styles.error}>{error}</div>}
+            {success && <div className={styles.success}>{success}</div>}
+
             <form onSubmit={handleSubmit}>
                 {[ 
                     { label: "Room Number", name: "number_room", type: "text" },
                     { label: "Room Name", name: "name", type: "text" },
-                    { label: "Number of Beds", name: "beds", type: "number" },
-                    { label: "Room Size (m²)", name: "size", type: "number" },
-                ].map(({ label, name, type }) => (
+                    { label: "Number of Beds", name: "beds", type: "number", min: 1 },
+                    { label: "Room Size (m²)", name: "size", type: "number", min: 1 },
+                ].map(({ label, name, type, min }) => (
                     <div key={name} className={styles.formGroup}>
                         <label className={styles.label}>{label}</label>
                         <input
@@ -105,42 +144,42 @@ const RoomRegistration = () => {
                             required
                             className={styles.input}
                             autoComplete="off"
-                            min={type === "number" ? "1" : undefined}
+                            min={min}
                         />
                     </div>
                 ))}
 
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>Type of Room</label>
-                        <select
-                            name="type_room"
-                            value={roomDetails.type_room}
-                            onChange={handleInputChange}
-                            className={styles.input}
-                            required
-                        >
-                            <option value="" disabled hidden>Select a room type</option>
-                            {roomTypes.map(type => (
-                                <option key={type} value={type}>{type}</option>
-                            ))}
-                        </select>
-                    </div>
+                <div className={styles.formGroup}>
+                    <label className={styles.label}>Type of Room</label>
+                    <select
+                        name="type_room"
+                        value={roomDetails.type_room}
+                        onChange={handleInputChange}
+                        className={styles.input}
+                        required
+                    >
+                        <option value="" disabled hidden>Select a room type</option>
+                        {roomTypes.map(type => (
+                            <option key={type} value={type}>{type}</option>
+                        ))}
+                    </select>
+                </div>
 
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>Category of Room</label>
-                        <select
-                            name="category_room"
-                            value={roomDetails.category_room}
-                            onChange={handleInputChange}
-                            className={styles.input}
-                            required
-                        >
-                            <option value="" disabled hidden>Select a category</option>
-                            {roomCategories.map(category => (
-                                <option key={category} value={category}>{category}</option>
-                            ))}
-                        </select>
-                    </div>
+                <div className={styles.formGroup}>
+                    <label className={styles.label}>Category of Room</label>
+                    <select
+                        name="category_room"
+                        value={roomDetails.category_room}
+                        onChange={handleInputChange}
+                        className={styles.input}
+                        required
+                    >
+                        <option value="" disabled hidden>Select a category</option>
+                        {roomCategories.map(category => (
+                            <option key={category} value={category}>{category}</option>
+                        ))}
+                    </select>
+                </div>
 
                 <div className={styles.formGroup}>
                     <label className={styles.label}>Room Options:</label>
@@ -159,7 +198,13 @@ const RoomRegistration = () => {
                     </div>
                 </div>
 
-                <button type="submit" className={styles.button}>Register Room</button>
+                <button 
+                    type="submit" 
+                    className={styles.button}
+                    disabled={loading}
+                >
+                    {loading ? "Registering..." : "Register Room"}
+                </button>
             </form>
         </div>
     );

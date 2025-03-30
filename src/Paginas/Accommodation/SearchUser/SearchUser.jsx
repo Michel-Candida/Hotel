@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import './SearchUser.css';
 
 const ClientSearch = () => {
@@ -9,75 +10,59 @@ const ClientSearch = () => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-    // Histórico comentado para implementação futura
-    // const [searchHistory, setSearchHistory] = useState([]);
 
-    /* Histórico comentado
-    useEffect(() => {
-        const savedHistory = localStorage.getItem('clientSearchHistory');
-        if (savedHistory) {
-            setSearchHistory(JSON.parse(savedHistory));
-        }
-    }, []);
-    */
+    const api = axios.create({
+        baseURL: 'http://localhost:5000/api',
+        timeout: 10000
+    });
 
     const searchClients = async () => {
         if (!searchTerm.trim()) {
             setError('Por favor, digite um termo para buscar');
             return;
         }
-
+    
         setIsLoading(true);
         setError('');
         setResults([]);
-
+    
         try {
-            const response = await fetch(
-                `http://localhost:5000/api/clients/search?${searchType}=${encodeURIComponent(searchTerm)}`
-            );
-            
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Erro na busca');
-            }
-
-            if (!data.success) {
-                setError(data.message);
+            // Formato correto para a requisição
+            const params = {
+                [searchType]: searchType === 'name' ? searchTerm : searchTerm
+                // Removi os % do frontend - o backend deve adicionar se necessário
+            };
+    
+            const response = await api.get('/clients/search', { params });
+    
+            if (!response.data.success) {
+                setError(response.data.message || 'Nenhum resultado encontrado');
                 return;
             }
-
-            setResults(data.data);
-            
-            /* Histórico comentado
-            const newSearch = {
-                type: searchType,
-                term: searchTerm,
-                when: new Date().toLocaleString(),
-                results: data.data.length
-            };
-
-            setSearchHistory(prev => {
-                const updated = [newSearch, ...prev.filter(item => 
-                    !(item.type === searchType && item.term === searchTerm)
-                )].slice(0, 10);
-                localStorage.setItem('clientSearchHistory', JSON.stringify(updated));
-                return updated;
-            });
-            */
-
+    
+            setResults(response.data.data || []);
+    
         } catch (err) {
-            console.error("Search error:", err);
-            setError(err.message || 'Erro ao buscar clientes');
+            console.error("Erro na busca:", err);
+            if (err.response?.status === 404) {
+                setError('Endpoint não encontrado. Contate o suporte técnico.');
+            } else {
+                setError(err.response?.data?.message || 'Erro ao buscar clientes');
+            }
         } finally {
             setIsLoading(false);
         }
     };
+    
 
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
             searchClients();
         }
+    };
+
+    const handleClientClick = (clientCode) => {
+        navigate(`/client/${clientCode}`);
     };
     
     return (
@@ -89,7 +74,7 @@ const ClientSearch = () => {
                 >
                     &larr; Menu
                 </button>
-                <h2>Search Client</h2>
+                <h2>Buscar Clientes</h2>
             </div>
 
             <div className="search-controls">
@@ -116,11 +101,14 @@ const ClientSearch = () => {
                 
                 <button 
                     onClick={searchClients}
-                    disabled={isLoading}
+                    disabled={isLoading || !searchTerm.trim()}
                     className="search-button"
                 >
                     {isLoading ? (
-                        <span className="loading-spinner"></span>
+                        <>
+                            <span className="loading-spinner"></span>
+                            Buscando...
+                        </>
                     ) : (
                         'Buscar'
                     )}
@@ -130,44 +118,17 @@ const ClientSearch = () => {
             {error && (
                 <div className="error-message">
                     <p>{error}</p>
-                    {error.includes("Nenhum cliente encontrado") && (
-                        <button 
-                            className="clear-search"
-                            onClick={() => setSearchTerm('')}
-                        >
-                            Limpar busca
-                        </button>
-                    )}
+                    <button 
+                        className="clear-search"
+                        onClick={() => {
+                            setSearchTerm('');
+                            setError('');
+                        }}
+                    >
+                        Limpar busca
+                    </button>
                 </div>
             )}
-            
-            {/* Seção de histórico comentada
-            {searchHistory.length > 0 && (
-                <div className="search-history">
-                    <h3>Histórico de Buscas:</h3>
-                    <ul>
-                        {searchHistory.map((item, index) => (
-                            <li key={index}>
-                                <button
-                                    onClick={() => {
-                                        setSearchType(item.type);
-                                        setSearchTerm(item.term);
-                                        searchClients();
-                                    }}
-                                    className="history-item"
-                                >
-                                    <span className="history-type">{item.type}:</span>
-                                    <span className="history-term">{item.term}</span>
-                                    <span className="history-meta">
-                                        {item.results} resultado(s) • {item.when}
-                                    </span>
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
-            */}
             
             <div className="results-container">
                 {results.length > 0 ? (
@@ -178,7 +139,11 @@ const ClientSearch = () => {
                         
                         <div className="client-cards">
                             {results.map(client => (
-                                <div key={client.client_id} className="client-card">
+                                <div 
+                                    key={client.client_code} 
+                                    className="client-card"
+                                    onClick={() => handleClientClick(client.client_code)}
+                                >
                                     <div className="client-header">
                                         <span className="client-code">{client.client_code}</span>
                                         <span className="client-date">Cadastro: {client.registration_date}</span>

@@ -3,10 +3,16 @@ import axios from "axios";
 import styles from "./RoomUpdate.module.css";
 
 const RoomUpdate = () => {
-    const [roomCode, setRoomCode] = useState("");
+    const [searchType, setSearchType] = useState("number_room"); 
+    const [searchTerm, setSearchTerm] = useState("");
     const [roomDetails, setRoomDetails] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
+    const api = axios.create({
+        baseURL: "http://localhost:5000/api",
+        timeout: 10000
+    });
 
     const roomOptions = [
         "Double Bed",
@@ -23,22 +29,46 @@ const RoomUpdate = () => {
         "Non-Smoking",
     ];
 
-    const fetchRoomData = () => {
+    const fetchRoomData = async () => {
+        if (!searchTerm.trim()) {
+            setError("Please enter a search term");
+            return;
+        }
+    
         setLoading(true);
         setError("");
+        setRoomDetails(null);
     
-        axios
-            .get(`http://localhost:5000/api/rooms/${roomCode}`)  
-            .then((response) => {
-                setRoomDetails(response.data);
-            })
-            .catch((err) => {
-                setRoomDetails(null);
-                setError("Room not found. Please check the code.");
-            })
-            .finally(() => {
-                setLoading(false);
+        try {
+            // Construa os parâmetros de forma mais robusta
+            const params = new URLSearchParams();
+            if (searchType === "number_room") {
+                params.append('number_room', searchTerm);
+            } else {
+                params.append('name', searchTerm);
+            }
+    
+            const response = await api.get(`/rooms/search?${params.toString()}`);
+            
+            if (response.data.data?.length > 0) {
+                setRoomDetails({
+                    ...response.data.data[0],
+                    options: response.data.data[0].options || [] // Garante que options seja um array
+                });
+            } else {
+                setError("No rooms found matching your criteria");
+            }
+        } catch (err) {
+            console.error("Search error details:", {
+                url: err.config?.url,
+                status: err.response?.status,
+                data: err.response?.data
             });
+            setError(err.response?.data?.message || 
+                   "Error searching for room. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleInputChange = (e) => {
@@ -58,35 +88,37 @@ const RoomUpdate = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
     
-        if (
-            roomDetails.beds < 1 ||
-            roomDetails.bathroom < 1 ||
-            roomDetails.capacity < 1 ||
-            roomDetails.size < 1
-        ) {
-            alert("Nenhum campo numérico pode ser negativo ou zero.");
+        if (!roomDetails?.number_room) {
+            setError("No room selected for update");
+            return;
+        }
+
+        if (roomDetails.beds < 1 || roomDetails.size < 1) {
+            setError("Number of beds and room size must be positive values");
             return;
         }
     
         if (roomDetails.name.length < 3) {
-            alert("O nome do quarto deve ter pelo menos 3 caracteres.");
+            setError("Room name must be at least 3 characters long");
             return;
         }
     
         if (roomDetails.options.length === 0) {
-            alert("Por favor, selecione pelo menos uma opção para o quarto.");
+            setError("Please select at least one room option");
             return;
         }
     
         setLoading(true);
+        setError("");
     
-        axios
-            .put(`http://localhost:5000/api/rooms/${roomCode}`, roomDetails) 
+        api.put(`/rooms/${roomDetails.number_room}`, roomDetails)
             .then(() => {
+                setError(""); // Clear any previous error
                 alert("Room updated successfully!");
             })
             .catch((err) => {
-                setError("Error updating the room.");
+                console.error("Update error:", err);
+                setError(err.response?.data?.message || "Error updating the room");
             })
             .finally(() => {
                 setLoading(false);
@@ -97,49 +129,84 @@ const RoomUpdate = () => {
         <div className={styles.container}>
             <h1 className={styles.title}>Update Room</h1>
 
-            {/* Campo para buscar o quarto */}
+            {/* Campo de busca melhorado */}
             <div className={styles.searchContainer}>
+                <select
+                    value={searchType}
+                    onChange={(e) => setSearchType(e.target.value)}
+                    className={styles.select}
+                >
+                    <option value="number_room">Room Number</option>
+                    <option value="name">Room Name</option>
+                </select>
+                
                 <input
                     type="text"
-                    placeholder="Enter room code"
-                    value={roomCode}
-                    onChange={(e) => setRoomCode(e.target.value)}
+                    placeholder={`Enter ${searchType === "number_room" ? "room number" : "room name"}`}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     className={styles.input}
                     autoComplete="off"
                 />
-                <button onClick={fetchRoomData} className={styles.button}>
+                
+                <button 
+                    onClick={fetchRoomData} 
+                    className={styles.button}
+                    disabled={loading || !searchTerm.trim()}
+                >
                     {loading ? "Searching..." : "Search"}
                 </button>
             </div>
 
-            {error && <p style={{ color: "red" }}>{error}</p>}
+            {error && <div className={styles.error}>{error}</div>}
 
             {roomDetails && (
-                <form onSubmit={handleSubmit}>
-                    {[{
-                        label: "Room Name/Code", name: "name", type: "text"
-                    }, {
-                        label: "Number of Beds", name: "beds", type: "number"
-                    }, {
-                        label: "Number of Bathrooms", name: "bathroom", type: "number"
-                    }, {
-                        label: "Capacity (People)", name: "capacity", type: "number"
-                    }, {
-                        label: "Room Size (m²)", name: "size", type: "number"
-                    }].map(({ label, name, type }) => (
+                <form onSubmit={handleSubmit} className={styles.form}>
+                    {[
+                        { label: "Room Number", name: "number_room", type: "text", readOnly: true },
+                        { label: "Room Name", name: "name", type: "text" },
+                        { label: "Number of Beds", name: "beds", type: "number", min: 1 },
+                        { label: "Room Size (m²)", name: "size", type: "number", min: 1 }
+                    ].map(({ label, name, type, min, readOnly }) => (
                         <div key={name} className={styles.formGroup}>
                             <label className={styles.label}>{label}</label>
                             <input
                                 type={type}
                                 name={name}
-                                value={roomDetails[name]}
+                                value={roomDetails[name] || ""}
                                 onChange={handleInputChange}
                                 required
                                 className={styles.input}
                                 autoComplete="off"
+                                min={min}
+                                readOnly={readOnly}
                             />
                         </div>
                     ))}
+
+                    <div className={styles.formGroup}>
+                        <label className={styles.label}>Room Type</label>
+                        <input
+                            type="text"
+                            name="type_room"
+                            value={roomDetails.type_room || ""}
+                            onChange={handleInputChange}
+                            className={styles.input}
+                            required
+                        />
+                    </div>
+
+                    <div className={styles.formGroup}>
+                        <label className={styles.label}>Room Category</label>
+                        <input
+                            type="text"
+                            name="category_room"
+                            value={roomDetails.category_room || ""}
+                            onChange={handleInputChange}
+                            className={styles.input}
+                            required
+                        />
+                    </div>
 
                     <div className={styles.formGroup}>
                         <label className={styles.label}>Room Options:</label>
@@ -148,7 +215,7 @@ const RoomUpdate = () => {
                                 <label key={option} className={styles.checkboxLabel}>
                                     <input
                                         type="checkbox"
-                                        checked={roomDetails.options.includes(option)}
+                                        checked={roomDetails.options?.includes(option) || false}
                                         onChange={() => handleOptionChange(option)}
                                         autoComplete="off"
                                     />
@@ -158,7 +225,11 @@ const RoomUpdate = () => {
                         </div>
                     </div>
 
-                    <button type="submit" className={styles.updateButton}>
+                    <button 
+                        type="submit" 
+                        className={styles.updateButton}
+                        disabled={loading}
+                    >
                         {loading ? "Updating..." : "Update Room"}
                     </button>
                 </form>

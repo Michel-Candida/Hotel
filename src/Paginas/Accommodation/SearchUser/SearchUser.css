@@ -242,3 +242,23 @@
     border-color: #007bff;
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
+
+.error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.clear-search {
+    background: none;
+    border: none;
+    color: #c62828;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 5px;
+}

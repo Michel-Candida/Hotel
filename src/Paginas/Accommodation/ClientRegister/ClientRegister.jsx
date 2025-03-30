@@ -6,19 +6,24 @@ import './ClientRegister.css';
 const ClientRegister = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    client_code: '',
     name: '',
     email: '',
     phone: '',
     document: ''
   });
+  const [clientCode, setClientCode] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const api = axios.create({
-    baseURL: 'http://localhost:5000',
+    baseURL: 'http://localhost:5000/api',
+    headers: {
+      'Content-Type': 'application/json'
+    }
   });
 
+  // Funções de validação
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -34,6 +39,10 @@ const ClientRegister = () => {
     return phoneRegex.test(phone);
   };
 
+  const validateName = (name) => {
+    return name.length >= 3 && /^[a-zA-Z\s]+$/.test(name);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -46,50 +55,77 @@ const ClientRegister = () => {
 
   const validateForm = () => {
     const { name, email, phone, document } = formData;
+    
     if (!name || !email || !phone || !document) {
       setErrorMessage('All fields are required!');
       return false;
     }
+
+    if (!validateName(name)) {
+      setErrorMessage('Name must contain at least 3 letters and only alphabetic characters');
+      return false;
+    }
+
+    if (!validateEmail(email)) {
+      setErrorMessage('Invalid email format');
+      return false;
+    }
+
+    if (!validateDocument(document)) {
+      setErrorMessage('Document must contain only numbers and hyphens');
+      return false;
+    }
+
+    if (!validatePhone(phone)) {
+      setErrorMessage('Phone number must contain only numbers');
+      return false;
+    }
+
     return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setIsLoading(true);
     setErrorMessage('');
     setSuccessMessage('');
-    
+
     if (!validateForm()) {
+      setIsLoading(false);
       return;
     }
-  
-    if (!validateEmail(formData.email)) {
-      setErrorMessage('Invalid email format');
-      return;
-    }
-  
-    if (!validateDocument(formData.document)) {
-      setErrorMessage('Document must contain only numbers and be at least 8 digits long');
-      return;
-    }
-  
-    if (!validatePhone(formData.phone)) {
-      setErrorMessage('Phone number must contain only numbers');
-      return;
-    }
-  
+
     try {
       const response = await api.post('/clients', formData);
+      
       if (response.status === 201) {
-        setFormData((prevData) => ({
-          ...prevData,
-          client_code: response.data.client.client_code
-        }));
-        setSuccessMessage('Client registered successfully!');
+        setClientCode(response.data.client.client_code);
+        setSuccessMessage(response.data.message || 'Client registered successfully!');
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          document: ''
+        });
       }
     } catch (error) {
-      console.error('Error registering client:', error.response?.data?.message || error);
-      setErrorMessage(error.response?.data?.message || 'Error registering client');
+      console.error('Error registering client:', error);
+      
+      if (error.response) {
+        if (error.response.status === 400) {
+          setErrorMessage(error.response.data.message || 'Validation error');
+        } else if (error.response.status === 409) {
+          setErrorMessage('Document or email already exists');
+        } else {
+          setErrorMessage('Server error occurred');
+        }
+      } else if (error.request) {
+        setErrorMessage('No response from server. Please try again later.');
+      } else {
+        setErrorMessage('Error setting up request');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -97,26 +133,28 @@ const ClientRegister = () => {
     <div className='Main-Container-Register-Client'>
       <div className="user-register-container">
         <div className="header-Register-back">
-            <button 
-              onClick={() => navigate('/MainMenu')} 
-              className="Rc-back-button"
-            >
-              &larr; Menu
-            </button>
+          <button 
+            onClick={() => navigate('/MainMenu')} 
+            className="Rc-back-button"
+          >
+            &larr; Menu
+          </button>
           <h2>Client Registration</h2>
         </div>
+        
         <form onSubmit={handleSubmit} className="user-register-form">
-          <div>
-            <label>Client Code:</label>
-            <input
-              type="text"
-              name="client_code"
-              placeholder="Auto-generated code"
-              value={formData.client_code || 'Generating...'}
-              readOnly
-              autoComplete="off"
-            />
-          </div>
+          {clientCode && (
+            <div>
+              <label>Client Code:</label>
+              <input
+                type="text"
+                placeholder="Auto-generated code"
+                value={clientCode}
+                readOnly
+                autoComplete="off"
+              />
+            </div>
+          )}
 
           <div>
             <label>Name:</label>
@@ -169,12 +207,27 @@ const ClientRegister = () => {
               autoComplete="off"
             />
           </div>
-          <button type="submit" className="user-register-button">Register</button>
+
+          <button 
+            type="submit" 
+            className="user-register-button"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Registering...' : 'Register'}
+          </button>
         </form>
 
-        {errorMessage && <div className="error-message">{errorMessage}</div>}
+        {errorMessage && (
+          <div className="error-message">
+            {errorMessage}
+          </div>
+        )}
 
-        {successMessage && <div className="success-message">{successMessage}</div>}
+        {successMessage && (
+          <div className="success-message">
+            {successMessage}
+          </div>
+        )}
       </div>
     </div>
   );

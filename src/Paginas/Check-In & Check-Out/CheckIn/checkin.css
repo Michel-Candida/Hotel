@@ -40,10 +40,11 @@
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.checkin-form input:focus {
+.checkin-form input:focus,
+.checkin-form input:hover {
     outline: none;
-    border-color: #5c9f7f;
-    box-shadow: 0 0 5px rgba(92, 159, 127, 0.5);
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
 /* Button Styling */
@@ -69,7 +70,7 @@
 }
 
 .checkin-form .buttons button:hover:not(:disabled) {
-    background-color: #5c9f7f;
+    background-color: #007bff;
     color: white;
 }
 
@@ -108,12 +109,12 @@
 }
 
 .add-companion {
-    background-color: #27ae60;
+    background-color: #007bff;
     color: white;
 }
 
 .add-companion:hover {
-    background-color: #219150;
+    background-color: #0056b3;
 }
 
 .remove-companion {
@@ -127,7 +128,7 @@
 
 /* Check-In Button */
 .checkin-button {
-    background-color: #5c9f7f;
+    background-color: #007bff;
     color: white;
     border: none;
     padding: 15px;
@@ -144,7 +145,7 @@
 }
 
 .checkin-button:hover:not(:disabled) {
-    background-color: #457a63;
+    background-color: #0056b3;
 }
 
 /* Back Button */

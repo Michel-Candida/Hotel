@@ -5,25 +5,27 @@ import './UserUpdate.css';
 
 const UserUpdate = () => {
     const [clientCode, setClientCode] = useState('');
-    const navigate = useNavigate();
-    
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         phone: '',
         document: ''
     });
-
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+    const navigate = useNavigate();
 
-    
+    const api = axios.create({
+        baseURL: 'http://localhost:5000/api',
+        timeout: 10000
+    });
+
     const validateEmail = (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
     };
-   
+
     const validatePhone = (phone) => {
         const phoneRegex = /^[0-9]+$/;
         return phoneRegex.test(phone);
@@ -35,28 +37,35 @@ const UserUpdate = () => {
     };
 
     const handleSearchClient = async () => {
-        if (!clientCode) {
-            alert("Please enter a client code.");
+        if (!clientCode.trim()) {
+            setErrorMessage("Por favor, insira um código de cliente.");
             return;
         }
 
         setLoading(true);
-        setErrorMessage('');  // Limpa a mensagem de erro ao iniciar a busca
-        setSuccessMessage(''); // Limpa a mensagem de sucesso ao iniciar a busca
-        try {
-            const { data } = await axios.get(`http://localhost:5000/clients/${clientCode}`);
+        setErrorMessage('');
+        setSuccessMessage('');
 
-            if (data && Object.keys(data).length > 0) {
-                setFormData(prevState => ({
-                    ...prevState,
-                    ...data
-                }));
+        try {
+            const response = await api.get(`/clients/${clientCode}`);
+            
+            if (response.data) {
+                setFormData({
+                    name: response.data.name || '',
+                    email: response.data.email || '',
+                    phone: response.data.phone || '',
+                    document: response.data.document || ''
+                });
             } else {
-                setErrorMessage("Client code not found.");
+                setErrorMessage("Cliente não encontrado.");
             }
         } catch (error) {
-            console.error("Error fetching client:", error);
-            setErrorMessage("Error fetching client. Please try again.");
+            console.error("Erro ao buscar cliente:", error);
+            if (error.response?.status === 404) {
+                setErrorMessage("Cliente não encontrado. Verifique o código.");
+            } else {
+                setErrorMessage("Erro ao buscar cliente. Tente novamente.");
+            }
         } finally {
             setLoading(false);
         }
@@ -64,54 +73,62 @@ const UserUpdate = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prevState => ({
-            ...prevState,
+        setFormData(prev => ({
+            ...prev,
             [name]: value
         }));
     };
 
     const handleUpdateClient = async (e) => {
         e.preventDefault();
-    
+
         if (!clientCode) {
-            alert("Please search for a client first.");
+            setErrorMessage("Busque um cliente primeiro.");
             return;
         }
-    
-        // Limpa as mensagens antes de iniciar a atualização
+
+        // Validações
+        if (!validateEmail(formData.email)) {
+            setErrorMessage("Formato de e-mail inválido");
+            return;
+        }
+
+        if (!validatePhone(formData.phone)) {
+            setErrorMessage("Telefone deve conter apenas números");
+            return;
+        }
+
+        if (!validateDocument(formData.document)) {
+            setErrorMessage("Documento deve conter apenas letras e números");
+            return;
+        }
+
+        setLoading(true);
         setErrorMessage('');
         setSuccessMessage('');
-    
-        if (!validateEmail(formData.email)) {
-            setErrorMessage("Invalid email format");
-            return;
-        }
-    
-        if (!validatePhone(formData.phone)) {
-            setErrorMessage("Phone number must contain only numbers");
-            return;
-        }
-    
-        if (!validateDocument(formData.document)) {
-            setErrorMessage("Document must contain only letters and numbers");
-            return;
-        }
-    
+
         try {
-            const response = await axios.put(`http://localhost:5000/clients/${clientCode}`, formData);
-    
+            const response = await api.put(`/clients/${clientCode}`, {
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone,
+                document: formData.document
+            });
+
             if (response.status === 200) {
-                setSuccessMessage("Client updated successfully!"); // Define a mensagem de sucesso
-            } else {
-                setErrorMessage("Unexpected response from the server.");
+                setSuccessMessage("Cliente atualizado com sucesso!");
+                // Atualiza os dados locais com a resposta do servidor
+                setFormData(response.data.client);
             }
         } catch (error) {
-            console.error("Error updating client:", error);
+            console.error("Erro ao atualizar cliente:", error);
             if (error.response?.data?.message?.includes("Document already exists")) {
-                setErrorMessage("Document already exists. Please use a different one.");
+                setErrorMessage("Documento já existe. Por favor use um diferente.");
             } else {
-                setErrorMessage("Error updating client. Please check the data and try again.");
+                setErrorMessage(error.response?.data?.message || "Erro ao atualizar cliente.");
             }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -124,7 +141,7 @@ const UserUpdate = () => {
                 >
                     &larr; Menu
                 </button>
-                <h2>Client Update</h2>
+                <h2>Atualizar Cliente</h2>
             </div>
             
             <div className="user-update-search">
@@ -132,15 +149,15 @@ const UserUpdate = () => {
                     type="text" 
                     value={clientCode} 
                     onChange={(e) => setClientCode(e.target.value)} 
-                    placeholder="Enter client code"
+                    placeholder="Digite o código do cliente"
                     autoComplete="off"
                 />
                 <button 
                     className="user-update-search-button" 
                     onClick={handleSearchClient} 
-                    disabled={loading}
+                    disabled={loading || !clientCode.trim()}
                 >
-                    {loading ? "Searching..." : "Search Client"}
+                    {loading ? "Buscando..." : "Buscar Cliente"}
                 </button>
             </div>
 
@@ -149,54 +166,60 @@ const UserUpdate = () => {
             
             <form className="user-update-form" onSubmit={handleUpdateClient}>
                 <div>
-                    <label>Name:</label>
+                    <label>Nome:</label>
                     <input 
                         type="text" 
                         name="name" 
                         value={formData.name} 
                         onChange={handleChange} 
                         required 
-                        placeholder="Enter full name"
+                        placeholder="Nome completo"
                         autoComplete="off"
                     />
                 </div>
                 <div>
-                    <label>Email:</label>
+                    <label>E-mail:</label>
                     <input 
                         type="email" 
                         name="email" 
                         value={formData.email} 
                         onChange={handleChange} 
                         required 
-                        placeholder="Enter email address"
+                        placeholder="Endereço de e-mail"
                         autoComplete="off"
                     />
                 </div>
                 <div>
-                    <label>Phone:</label>
+                    <label>Telefone:</label>
                     <input 
                         type="text" 
                         name="phone" 
                         value={formData.phone} 
                         onChange={handleChange} 
                         required 
-                        placeholder="Enter phone number"
+                        placeholder="Número de telefone"
                         autoComplete="off"
                     />
                 </div>
                 <div>
-                    <label>Document:</label>
+                    <label>Documento:</label>
                     <input 
                         type="text" 
                         name="document" 
                         value={formData.document} 
                         onChange={handleChange} 
                         required 
-                        placeholder="Enter document (letters and numbers only)"
+                        placeholder="Documento (apenas letras e números)"
                         autoComplete="off"
                     />
                 </div>
-                <button type="submit">Update Client</button>
+                <button 
+                    type="submit" 
+                    disabled={loading || !clientCode}
+                    className="update-button"
+                >
+                    {loading ? "Atualizando..." : "Atualizar Cliente"}
+                </button>
             </form>
         </div>
     );
