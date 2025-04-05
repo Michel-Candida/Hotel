@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios"; 
+import { useNavigate } from 'react-router-dom';
 import styles from "./RoomUpdate.module.css";
 
 const RoomUpdate = () => {
+    const navigate = useNavigate();
     const [searchType, setSearchType] = useState("number_room"); 
     const [searchTerm, setSearchTerm] = useState("");
     const [roomDetails, setRoomDetails] = useState(null);
@@ -15,18 +17,9 @@ const RoomUpdate = () => {
     });
 
     const roomOptions = [
-        "Double Bed",
-        "Twin Bed",
-        "Garden View",
-        "Beach View",
-        "Lake View",
-        "Bathroom with Bathtub",
-        "Living Area",
-        "Cable TV",
-        "Wireless Internet",
-        "Hair Dryer",
-        "In-room Safe",
-        "Non-Smoking",
+        "Double Bed", "Twin Bed", "Garden View", "Beach View", "Lake View",
+        "Bathroom with Bathtub", "Living Area", "Cable TV", "Wireless Internet",
+        "Hair Dryer", "In-room Safe", "Non-Smoking"
     ];
 
     const fetchRoomData = async () => {
@@ -34,26 +27,22 @@ const RoomUpdate = () => {
             setError("Please enter a search term");
             return;
         }
-    
+
         setLoading(true);
         setError("");
         setRoomDetails(null);
-    
+
         try {
-            // Construa os parâmetros de forma mais robusta
             const params = new URLSearchParams();
-            if (searchType === "number_room") {
-                params.append('number_room', searchTerm);
-            } else {
-                params.append('name', searchTerm);
-            }
-    
+            searchType === "number_room"
+                ? params.append("number_room", searchTerm)
+                : params.append("name", searchTerm);
+
             const response = await api.get(`/rooms/search?${params.toString()}`);
-            
             if (response.data.data?.length > 0) {
                 setRoomDetails({
                     ...response.data.data[0],
-                    options: response.data.data[0].options || [] // Garante que options seja um array
+                    options: response.data.data[0].options || []
                 });
             } else {
                 setError("No rooms found matching your criteria");
@@ -64,8 +53,7 @@ const RoomUpdate = () => {
                 status: err.response?.status,
                 data: err.response?.data
             });
-            setError(err.response?.data?.message || 
-                   "Error searching for room. Please try again.");
+            setError(err.response?.data?.message || "Error searching for room. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -87,7 +75,7 @@ const RoomUpdate = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-    
+
         if (!roomDetails?.number_room) {
             setError("No room selected for update");
             return;
@@ -97,23 +85,22 @@ const RoomUpdate = () => {
             setError("Number of beds and room size must be positive values");
             return;
         }
-    
+
         if (roomDetails.name.length < 3) {
             setError("Room name must be at least 3 characters long");
             return;
         }
-    
+
         if (roomDetails.options.length === 0) {
             setError("Please select at least one room option");
             return;
         }
-    
+
         setLoading(true);
         setError("");
-    
+
         api.put(`/rooms/${roomDetails.number_room}`, roomDetails)
             .then(() => {
-                setError(""); // Clear any previous error
                 alert("Room updated successfully!");
             })
             .catch((err) => {
@@ -127,19 +114,25 @@ const RoomUpdate = () => {
 
     return (
         <div className={styles.container}>
+            <button 
+            onClick={() => navigate('/MainMenu')} 
+            className={styles.backButtonUpdate}
+            >
+            &larr; Menu
+          </button>
+
             <h1 className={styles.title}>Update Room</h1>
 
-            {/* Campo de busca melhorado */}
             <div className={styles.searchContainer}>
                 <select
                     value={searchType}
                     onChange={(e) => setSearchType(e.target.value)}
-                    className={styles.select}
+                    className={styles.input}
                 >
                     <option value="number_room">Room Number</option>
                     <option value="name">Room Name</option>
                 </select>
-                
+
                 <input
                     type="text"
                     placeholder={`Enter ${searchType === "number_room" ? "room number" : "room name"}`}
@@ -148,7 +141,7 @@ const RoomUpdate = () => {
                     className={styles.input}
                     autoComplete="off"
                 />
-                
+
                 <button 
                     onClick={fetchRoomData} 
                     className={styles.button}
@@ -217,7 +210,6 @@ const RoomUpdate = () => {
                                         type="checkbox"
                                         checked={roomDetails.options?.includes(option) || false}
                                         onChange={() => handleOptionChange(option)}
-                                        autoComplete="off"
                                     />
                                     {option}
                                 </label>

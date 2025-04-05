@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
-import './checkout.css';
+import { useNavigate } from 'react-router-dom';
+import './checkout.css'; // Importando o CSS separado
 
 const CheckOut = () => {
     const [formData, setFormData] = useState({
@@ -17,6 +17,7 @@ const CheckOut = () => {
     });
 
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
     const handleClientCodeChange = async (e) => {
         const clientCode = e.target.value;
@@ -129,7 +130,9 @@ const CheckOut = () => {
                     </>
                 )}
             </form>
-            <Link to="/" className="back-button">Back</Link>
+            <button onClick={() => navigate('/MainMenu')} className="back-button">
+                &larr; Menu
+            </button>
         </div>
     );
 };

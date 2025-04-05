@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 
 const Dashboard = () => {
+      const navigate = useNavigate();
     const [reservations, setReservations] = useState([]);
     const [checkedInGuests, setCheckedInGuests] = useState([]);
     const [availableRooms, setAvailableRooms] = useState([]);
@@ -31,53 +33,61 @@ const Dashboard = () => {
 
     return (
         <div className="dashboard-container">
-            <h1 className="dashboard-title">Hotel Dashboard</h1>
-
-            <div className="dashboard-section">
-                <h2>Current Reservations</h2>
-                <ul>
-                    {reservations.map(reservation => (
-                        <li key={reservation.id}>
-                            <span>{reservation.clientName} - Room: {reservation.roomNumber}</span>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-
-            <div className="dashboard-section">
-                <h2>Checked-In Guests</h2>
-                <ul>
-                    {checkedInGuests.map(guest => (
-                        <li key={guest.id}>
-                            <span>{guest.name} - Room: {guest.roomNumber}</span>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-
-            <div className="dashboard-section">
-                <h2>Available Rooms</h2>
-                <ul>
-                    {availableRooms.map(room => (
-                        <li key={room.id}>
-                            <span>Room {room.id} - {room.name}</span>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-
-            <div className="dashboard-section">
-                <h2>Pending Reservations</h2>
-                <ul>
-                    {pendingReservations.map(reservation => (
-                        <li key={reservation.id}>
-                            <span>{reservation.clientName} - Room: {reservation.roomNumber}</span>
-                        </li>
-                    ))}
-                </ul>
-            </div>
+          <button 
+            onClick={() => navigate('/MainMenu')} 
+            className="back-buttonDashboard"
+          >
+            &larr; Menu
+          </button>
+      
+          <h1 className="dashboard-title">Hotel Dashboard</h1>
+      
+          <div className="dashboard-section">
+            <h2>Current Reservations</h2>
+            <ul>
+              {reservations.map(reservation => (
+                <li key={reservation.id}>
+                  <span>{reservation.clientName} - Room: {reservation.roomNumber}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+      
+          <div className="dashboard-section">
+            <h2>Checked-In Guests</h2>
+            <ul>
+              {checkedInGuests.map(guest => (
+                <li key={guest.id}>
+                  <span>{guest.name} - Room: {guest.roomNumber}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+      
+          <div className="dashboard-section">
+            <h2>Available Rooms</h2>
+            <ul>
+              {availableRooms.map(room => (
+                <li key={room.id}>
+                  <span>Room {room.id} - {room.name}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+      
+          <div className="dashboard-section">
+            <h2>Pending Reservations</h2>
+            <ul>
+              {pendingReservations.map(reservation => (
+                <li key={reservation.id}>
+                  <span>{reservation.clientName} - Room: {reservation.roomNumber}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-    );
+      );
+      
 };
 
 export default Dashboard;

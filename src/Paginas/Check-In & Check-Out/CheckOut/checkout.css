@@ -1,25 +1,22 @@
-/* General Styling for the CheckOut Page */
 .checkout-container {
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 50px auto;
     width: 80%;
     max-width: 1000px;
-    background-color: #fff;
+    background-color: #ffffff;
     padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
 }
 
 .checkout-container h1 {
     text-align: center;
     font-size: 2em;
     margin-bottom: 20px;
-    color: #333;
-    font-weight: bold;
+    color: #222;
+    font-weight: 600;
 }
 
-/* CheckOut Form */
 .checkout-form {
     display: flex;
     flex-direction: column;
@@ -27,7 +24,7 @@
 }
 
 .checkout-form label {
-    font-weight: bold;
+    font-weight: 600;
     margin-bottom: 5px;
     color: #333;
 }
@@ -36,17 +33,16 @@
     padding: 10px;
     font-size: 1em;
     border: 1px solid #ccc;
-    border-radius: 6px;
+    border-radius: 8px;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .checkout-form input:focus {
     outline: none;
-    border-color: #5c9f7f;
-    box-shadow: 0 0 5px rgba(92, 159, 127, 0.5);
+    border-color: #0d6efd;
+    box-shadow: 0 0 6px rgba(13, 110, 253, 0.25);
 }
 
-/* Buttons */
 .checkout-form .buttons {
     display: flex;
     gap: 10px;
@@ -56,24 +52,67 @@
 .checkout-form .buttons button {
     padding: 12px 20px;
     font-size: 1em;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
     border: none;
+    font-weight: 600;
+    background-color: #0d6efd;
+    color: #fff;
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .checkout-form .buttons button:disabled {
-    background-color: #f5f5f5;
+    background-color: #d3d3d3;
     cursor: not-allowed;
 }
 
 .checkout-form .buttons button:hover:not(:disabled) {
-    background-color: #5c9f7f;
-    color: white;
+    background-color: #084298;
     transform: scale(1.05);
 }
 
-/* Companion Section */
+.checkout-button {
+    background-color: #0d6efd;
+    color: #ffffff;
+    border: none;
+    padding: 15px;
+    font-size: 1.2em;
+    margin-top: 20px;
+    cursor: pointer;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.checkout-button:disabled {
+    background-color: #d3d3d3;
+    cursor: not-allowed;
+}
+
+.checkout-button:hover:not(:disabled) {
+    background-color: #084298;
+    transform: scale(1.05);
+}
+
+.back-button {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 20px;
+    background-color: #0d6efd;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: 1em;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.back-button:hover {
+    background-color: #084298;
+}
+
 .companion-container {
     margin-top: 20px;
     border-top: 2px solid #ccc;
@@ -84,78 +123,7 @@
     width: 100%;
     margin-bottom: 10px;
     padding: 10px;
-}
-
-/* Improved Add/Remove Buttons */
-.add-remove-buttons {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.add-remove-buttons button {
-    flex: 1;
-    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
     font-size: 1em;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.add-remove-buttons .add-button {
-    background-color: #28a745;
-    color: white;
-}
-
-.add-remove-buttons .remove-button {
-    background-color: #dc3545;
-    color: white;
-}
-
-.add-remove-buttons button:hover {
-    opacity: 0.9;
-    transform: scale(1.05);
-}
-
-/* CheckOut Button */
-.checkout-button {
-    background-color: #5c9f7f;
-    color: white;
-    border: none;
-    padding: 15px;
-    font-size: 1.2em;
-    margin-top: 20px;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.checkout-button:disabled {
-    background-color: #d3d3d3;
-    cursor: not-allowed;
-}
-
-.checkout-button:hover:not(:disabled) {
-    background-color: #457a63;
-    transform: scale(1.05);
-}
-
-/* Back Button */
-.back-button {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 12px 20px;
-    background-color: #f2f2f2;
-    color: #333;
-    text-decoration: none;
-    border-radius: 6px;
-    font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.back-button:hover {
-    background-color: #ddd;
-    transform: scale(1.05);
 }

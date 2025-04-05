@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import styles from "./RoomRegistration.module.css";
 import axios from "axios";
 
@@ -16,6 +17,7 @@ const RoomRegistration = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const navigate = useNavigate();
 
     const api = axios.create({
         baseURL: "http://localhost:5000/api",
@@ -88,7 +90,6 @@ const RoomRegistration = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
         if (!validateForm()) return;
 
         setLoading(true);
@@ -97,7 +98,6 @@ const RoomRegistration = () => {
 
         try {
             const response = await api.post("/rooms", roomDetails);
-            
             setSuccess(`Room ${response.data.room.number_room} registered successfully!`);
             setRoomDetails({
                 number_room: "",
@@ -121,11 +121,11 @@ const RoomRegistration = () => {
     };
 
     return (
-        <div className={styles.container}>
-            <h1 className={styles.title}>Room Registration</h1>
+        <div className={styles["room-container"]}>
+            <h1 className={styles["room-title"]}>Room Registration</h1>
             
-            {error && <div className={styles.error}>{error}</div>}
-            {success && <div className={styles.success}>{success}</div>}
+            {error && <div className={styles["room-error"]}>{error}</div>}
+            {success && <div className={styles["room-success"]}>{success}</div>}
 
             <form onSubmit={handleSubmit}>
                 {[ 
@@ -134,28 +134,28 @@ const RoomRegistration = () => {
                     { label: "Number of Beds", name: "beds", type: "number", min: 1 },
                     { label: "Room Size (m²)", name: "size", type: "number", min: 1 },
                 ].map(({ label, name, type, min }) => (
-                    <div key={name} className={styles.formGroup}>
-                        <label className={styles.label}>{label}</label>
+                    <div key={name} className={styles["room-form-group"]}>
+                        <label className={styles["room-label"]}>{label}</label>
                         <input
                             type={type}
                             name={name}
                             value={roomDetails[name]}
                             onChange={handleInputChange}
                             required
-                            className={styles.input}
+                            className={styles["room-input"]}
                             autoComplete="off"
                             min={min}
                         />
                     </div>
                 ))}
 
-                <div className={styles.formGroup}>
-                    <label className={styles.label}>Type of Room</label>
+                <div className={styles["room-form-group"]}>
+                    <label className={styles["room-label"]}>Type of Room</label>
                     <select
                         name="type_room"
                         value={roomDetails.type_room}
                         onChange={handleInputChange}
-                        className={styles.input}
+                        className={styles["room-input"]}
                         required
                     >
                         <option value="" disabled hidden>Select a room type</option>
@@ -165,13 +165,13 @@ const RoomRegistration = () => {
                     </select>
                 </div>
 
-                <div className={styles.formGroup}>
-                    <label className={styles.label}>Category of Room</label>
+                <div className={styles["room-form-group"]}>
+                    <label className={styles["room-label"]}>Category of Room</label>
                     <select
                         name="category_room"
                         value={roomDetails.category_room}
                         onChange={handleInputChange}
-                        className={styles.input}
+                        className={styles["room-input"]}
                         required
                     >
                         <option value="" disabled hidden>Select a category</option>
@@ -181,11 +181,11 @@ const RoomRegistration = () => {
                     </select>
                 </div>
 
-                <div className={styles.formGroup}>
-                    <label className={styles.label}>Room Options:</label>
-                    <div className={styles.checkboxGroup}>
+                <div className={styles["room-form-group"]}>
+                    <label className={styles["room-label"]}>Room Options:</label>
+                    <div className={styles["room-checkbox-group"]}>
                         {roomOptions.map((option) => (
-                            <label key={option} className={styles.checkboxLabel}>
+                            <label key={option} className={styles["room-checkbox-label"]}>
                                 <input
                                     type="checkbox"
                                     checked={roomDetails.options.includes(option)}
@@ -200,11 +200,20 @@ const RoomRegistration = () => {
 
                 <button 
                     type="submit" 
-                    className={styles.button}
+                    className={styles["room-button"]}
                     disabled={loading}
                 >
                     {loading ? "Registering..." : "Register Room"}
                 </button>
+
+
+                <button 
+            onClick={() => navigate('/MainMenu')} 
+            className={styles["room-back-button"]}
+
+          >
+            &larr; Menu
+          </button>
             </form>
         </div>
     );

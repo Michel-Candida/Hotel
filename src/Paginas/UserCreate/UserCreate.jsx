@@ -1,10 +1,12 @@
 import React, { useState, useCallback, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 import "./UserCreate.css";
 
 const API_URL = "http://localhost:5000/users"; 
 
 const UserCreate = () => {
+    const navigate = useNavigate();
     const [users, setUsers] = useState([]);
     const [newUser, setNewUser] = useState({ name: "", password: "" });
 
@@ -56,8 +58,17 @@ const UserCreate = () => {
                     />
                 ))}
                 <button onClick={handleAddUser} className="add-button">
-                    Add User
-                </button>
+    Add User
+</button>
+
+<button 
+    onClick={() => navigate('/MainMenu')} 
+    className="back-buttonCreate"
+>
+    &larr; Menu
+</button>
+
+            
             </div>
             <div className="user-list">
                 <h2>User List</h2>

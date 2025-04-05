@@ -70,7 +70,7 @@ const ClientSearch = () => {
             <div className="header-with-back">
                 <button 
                     onClick={() => navigate('/MainMenu')} 
-                    className="back-button"
+                    className="back-button-search"
                 >
                     &larr; Menu
                 </button>

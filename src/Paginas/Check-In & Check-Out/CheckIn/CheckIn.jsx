@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import './checkin.css';
 
 const CheckIn = () => {
@@ -25,6 +26,7 @@ const CheckIn = () => {
     const [errorMessage, setErrorMessage] = useState("");
     const [availabilityLoading, setAvailabilityLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchRooms = async () => {
@@ -364,9 +366,13 @@ const CheckIn = () => {
                 {!isRoomAvailable && <p className="error-message">{errorMessage}</p>}
             </form>
 
-            <Link to="/MainMenu" className="back-button">
-                Back to Main Menu
-            </Link>
+            
+            <button 
+                    onClick={() => navigate('/MainMenu')} 
+                    className="back-button"
+                >
+                    &larr; Menu
+                </button>
         </div>
     );
 };
