@@ -17,7 +17,7 @@ app.use('/api/rooms', require('./routes/roomRoutes'));
 app.use('/api/clients', require('./routes/clientRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api', require('./routes/reservationRoutes'));
-
+app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 // Example data route (se realmente necessário)
 app.get("/api/data", async (req, res) => {
   try {

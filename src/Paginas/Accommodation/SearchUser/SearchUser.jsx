@@ -61,9 +61,6 @@ const ClientSearch = () => {
         }
     };
 
-    const handleClientClick = (clientCode) => {
-        navigate(`/client/${clientCode}`);
-    };
     
     return (
         <div className="client-search-container">
@@ -142,7 +139,7 @@ const ClientSearch = () => {
                                 <div 
                                     key={client.client_code} 
                                     className="client-card"
-                                    onClick={() => handleClientClick(client.client_code)}
+                                    
                                 >
                                     <div className="client-header">
                                         <span className="client-code">{client.client_code}</span>

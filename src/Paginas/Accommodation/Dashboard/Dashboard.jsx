@@ -4,32 +4,40 @@ import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 
 const Dashboard = () => {
-      const navigate = useNavigate();
+    const navigate = useNavigate();
     const [reservations, setReservations] = useState([]);
-    const [checkedInGuests, setCheckedInGuests] = useState([]);
-    const [availableRooms, setAvailableRooms] = useState([]);
-    const [pendingReservations, setPendingReservations] = useState([]);
+  const [checkedInGuests, setCheckedInGuests] = useState([]);
+  const [availableRooms, setAvailableRooms] = useState([]);
+  const [pendingReservations, setPendingReservations] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        // Buscar dados no back-end para popular a tela
-        const fetchData = async () => {
-            try {
-                const reservationsResponse = await axios.get('http://localhost:5000/reservations');
-                const checkedInResponse = await axios.get('http://localhost:5000/checkedin');
-                const roomsResponse = await axios.get('http://localhost:5000/rooms');
-                const pendingResponse = await axios.get('http://localhost:5000/pending-reservations');
-                
-                setReservations(reservationsResponse.data);
-                setCheckedInGuests(checkedInResponse.data);
-                setAvailableRooms(roomsResponse.data.filter(room => room.isAvailable));
-                setPendingReservations(pendingResponse.data);
-            } catch (error) {
-                console.error("Error fetching data for dashboard:", error);
-            }
-        };
+  useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const [reservationsRes, checkedInRes, roomsRes, pendingRes] = await Promise.all([
+        axios.get('http://localhost:5000/api/dashboard/reservations'),
+        axios.get('http://localhost:5000/api/dashboard/checkedin'),
+        axios.get('http://localhost:5000/api/dashboard/rooms'),
+        axios.get('http://localhost:5000/api/dashboard/pending-reservations'),
+      ]);
 
-        fetchData();
-    }, []);
+      setReservations(reservationsRes.data);
+      setCheckedInGuests(checkedInRes.data);
+      setAvailableRooms(roomsRes.data); 
+      setPendingReservations(pendingRes.data);
+    } catch (error) {
+      console.error("❌ Error fetching dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, []);
+
+  if (loading) {
+    return <div className="dashboard-container"><p>Loading data...</p></div>;
+  }
 
     return (
         <div className="dashboard-container">
@@ -43,51 +51,52 @@ const Dashboard = () => {
           <h1 className="dashboard-title">Hotel Dashboard</h1>
       
           <div className="dashboard-section">
-            <h2>Current Reservations</h2>
-            <ul>
-              {reservations.map(reservation => (
-                <li key={reservation.id}>
-                  <span>{reservation.clientName} - Room: {reservation.roomNumber}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-      
-          <div className="dashboard-section">
-            <h2>Checked-In Guests</h2>
-            <ul>
-              {checkedInGuests.map(guest => (
-                <li key={guest.id}>
-                  <span>{guest.name} - Room: {guest.roomNumber}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-      
-          <div className="dashboard-section">
-            <h2>Available Rooms</h2>
-            <ul>
-              {availableRooms.map(room => (
-                <li key={room.id}>
-                  <span>Room {room.id} - {room.name}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-      
-          <div className="dashboard-section">
-            <h2>Pending Reservations</h2>
-            <ul>
-              {pendingReservations.map(reservation => (
-                <li key={reservation.id}>
-                  <span>{reservation.clientName} - Room: {reservation.roomNumber}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      );
-      
+        <h2>✅ Reservas Confirmadas</h2>
+        <ul>
+          {reservations.map(res => (
+            <li key={res.id}>
+              <span>{res.clientName || res.name} - Quarto: {res.roomnumber}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="dashboard-section">
+        <h2>🏨 Hóspedes Hospedados</h2>
+        <ul>
+          {checkedInGuests.map(guest => (
+            <li key={guest.id}>
+              <span>
+                {guest.name} - Quarto: {guest.roomNumber} | Hóspedes: {guest.total_guests}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="dashboard-section">
+        <h2>🛏️ Quartos Disponíveis</h2>
+        <ul>
+          {availableRooms.map(room => (
+            <li key={room.id}>
+              <span>Quarto {room.number_room} - Tipo: {room.type_room}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="dashboard-section">
+        <h2>⏳ Reservas Pendentes</h2>
+        <ul>
+          {pendingReservations.map(res => (
+            <li key={res.id}>
+              <span>{res.clientName} - Quarto: {res.roomnumber}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
 };
 
 export default Dashboard;

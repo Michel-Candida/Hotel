@@ -47,14 +47,14 @@ const UserUpdate = () => {
         setSuccessMessage('');
 
         try {
-            const response = await api.get(`/clients/${clientCode}`);
+            const response = await api.get(`/clients/code/${clientCode}`);
             
             if (response.data) {
                 setFormData({
-                    name: response.data.name || '',
-                    email: response.data.email || '',
-                    phone: response.data.phone || '',
-                    document: response.data.document || ''
+                    name: response.data.client.name || '',
+                    email: response.data.client.email || '',
+                    phone: response.data.client.phone || '',
+                    document: response.data.client.document || ''
                 });
             } else {
                 setErrorMessage("Cliente não encontrado.");

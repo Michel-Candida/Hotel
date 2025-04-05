@@ -1,8 +1,8 @@
 /* Container principal do dashboard */
 .dashboard-container {
   width: 100%;
-  padding-bottom: 500px;
-  margin-bottom: 700px;
+  padding-bottom: 400px;
+  margin-bottom: 400px;
   padding: 20px;
   background-color: #f8f8f8;
   display: flex;
