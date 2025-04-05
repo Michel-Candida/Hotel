@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './checkout.css'; // Importando o CSS separado
+import './checkout.css';
 
 const CheckOut = () => {
     const [formData, setFormData] = useState({
@@ -13,7 +13,8 @@ const CheckOut = () => {
         roomNumber: '',
         checkInDate: '',
         checkOutDate: '',
-        companions: []
+        companions: [],
+        reservationId: null,
     });
 
     const [loading, setLoading] = useState(false);
@@ -26,21 +27,36 @@ const CheckOut = () => {
         if (clientCode.length > 0) {
             setLoading(true);
             try {
-                const { data } = await axios.get(`https://your-backend.com/reservations/${clientCode}`);
+                const { data } = await axios.get(`http://localhost:5000/api/reservations/${clientCode}`);
+                const reservation = data.reservation;
+                const client = reservation.client;
+
                 setFormData((prev) => ({
                     ...prev,
-                    name: data.client.name,
-                    email: data.client.email,
-                    phone: data.client.phone,
-                    document: data.client.document,
-                    roomNumber: data.roomNumber,
-                    checkInDate: data.checkInDate,
-                    companions: data.companions || [],
+                    reservationId: reservation.reservation_id,
+                    name: client.name,
+                    email: client.email,
+                    phone: client.phone,
+                    document: client.document,
+                    roomNumber: reservation.number_room,
+                    checkInDate: reservation.check_in_date.split('T')[0],
+                    companions: reservation.companions || [],
                 }));
             } catch (error) {
-                console.error("Error fetching reservation:", error);
-                alert("Reservation not found!");
-                setFormData((prev) => ({ ...prev, name: '', email: '', phone: '', document: '', roomNumber: '', checkInDate: '', companions: [] }));
+                console.error("Erro ao buscar reserva:", error);
+                alert("Reserva não encontrada.");
+                setFormData((prev) => ({
+                    ...prev,
+                    name: '',
+                    email: '',
+                    phone: '',
+                    document: '',
+                    roomNumber: '',
+                    checkInDate: '',
+                    checkOutDate: '',
+                    companions: [],
+                    reservationId: null,
+                }));
             } finally {
                 setLoading(false);
             }
@@ -49,16 +65,18 @@ const CheckOut = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!formData.reservationId) {
+            alert("Reserva inválida.");
+            return;
+        }
         setLoading(true);
         try {
-            await axios.post('https://your-backend.com/checkout', {
-                ...formData,
-                checkOutDate: new Date().toISOString().split('T')[0]
-            });
-            alert("Check-Out successfully completed!");
+            await axios.post(`http://localhost:5000/api/reservations/checkout/${formData.reservationId}`);
+            alert("Check-out realizado com sucesso!");
+            navigate('/MainMenu');
         } catch (error) {
-            console.error("Error during check-out:", error);
-            alert("Error completing check-out.");
+            console.error("Erro ao fazer check-out:", error);
+            alert("Erro ao processar check-out.");
         } finally {
             setLoading(false);
         }
@@ -69,62 +87,41 @@ const CheckOut = () => {
             <h1>Check-Out</h1>
             <form className="checkout-form" onSubmit={handleSubmit}>
                 <div>
-                    <label>Client Code:</label>
+                    <label>Código do Cliente:</label>
                     <input
                         type="text"
-                        name="clientCode"
                         value={formData.clientCode}
                         onChange={handleClientCodeChange}
                         required
                         disabled={loading}
-                        autoComplete="off"
                     />
                 </div>
-                {loading && <p>Loading reservation details...</p>}
+                {loading && <p>Carregando dados...</p>}
                 {formData.name && !loading && (
                     <>
-                        <div>
-                            <label>Name:</label>
-                            <input type="text" value={formData.name} readOnly />
-                        </div>
-                        <div>
-                            <label>Email:</label>
-                            <input type="email" value={formData.email} readOnly />
-                        </div>
-                        <div>
-                            <label>Phone:</label>
-                            <input type="text" value={formData.phone} readOnly />
-                        </div>
-                        <div>
-                            <label>Document:</label>
-                            <input type="text" value={formData.document} readOnly />
-                        </div>
-                        <div>
-                            <label>Room Number:</label>
-                            <input type="text" value={formData.roomNumber} readOnly />
-                        </div>
-                        <div>
-                            <label>Check-In Date:</label>
-                            <input type="date" value={formData.checkInDate} readOnly />
-                        </div>
-                        <div>
-                            <label>Check-Out Date:</label>
-                            <input type="date" value={formData.checkOutDate || new Date().toISOString().split('T')[0]} readOnly />
-                        </div>
+                        <div><label>Nome:</label><input type="text" value={formData.name} readOnly /></div>
+                        <div><label>Email:</label><input type="email" value={formData.email} readOnly /></div>
+                        <div><label>Telefone:</label><input type="text" value={formData.phone} readOnly /></div>
+                        <div><label>Documento:</label><input type="text" value={formData.document} readOnly /></div>
+                        <div><label>Quarto:</label><input type="text" value={formData.roomNumber} readOnly /></div>
+                        <div><label>Check-in:</label><input type="date" value={formData.checkInDate} readOnly /></div>
+                        <div><label>Check-out:</label><input type="date" value={new Date().toISOString().split('T')[0]} readOnly /></div>
+
                         {formData.companions.length > 0 && (
                             <div className="companion-container">
-                                <h3>Companions:</h3>
+                                <h3>Acompanhantes:</h3>
                                 {formData.companions.map((companion, index) => (
                                     <div key={index}>
-                                        <label>Companion {index + 1}:</label>
+                                        <label>Acompanhante {index + 1}:</label>
                                         <input type="text" value={companion.name} readOnly />
                                     </div>
                                 ))}
                             </div>
                         )}
+
                         <div className="buttons">
-                            <button type="submit" className="checkout-button" disabled={loading}>
-                                {loading ? "Processing..." : "Confirm Check-Out"}
+                            <button type="submit" disabled={loading}>
+                                {loading ? 'Processando...' : 'Confirmar Check-Out'}
                             </button>
                         </div>
                     </>
