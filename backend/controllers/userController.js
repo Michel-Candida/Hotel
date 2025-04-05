@@ -6,13 +6,22 @@ const { JWT_SECRET } = require('../config/config');
 module.exports = {
   createUser: async (req, res) => {
     try {
-      const { name, password } = req.body;
-      
-      const hashedPassword = await bcrypt.hash(password, 10); 
+      const { name, email, password } = req.body;
+
+      if (!name || !email || !password) {
+        return res.status(400).json({ error: "Name, email and password are required." });
+      }
+
+      const existingUser = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+      if (existingUser.rows.length > 0) {
+        return res.status(400).json({ error: "Email already registered." });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
 
       const result = await pool.query(
-        'INSERT INTO users (name, password) VALUES ($1, $2) RETURNING *',
-        [name, hashedPassword]
+        'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING user_id, name, email',
+        [name, email, hashedPassword]
       );
 
       res.status(201).json({ message: "User created successfully", user: result.rows[0] });
@@ -24,9 +33,10 @@ module.exports = {
 
   listUsers: async (req, res) => {
     try {
-      const result = await pool.query('SELECT * FROM users');
+      const result = await pool.query('SELECT user_id, name, email FROM users');
       res.json(result.rows);
     } catch (error) {
+      console.error("Erro ao listar usuários:", error);
       res.status(500).json({ error: error.message });
     }
   },
@@ -34,9 +44,15 @@ module.exports = {
   deleteUser: async (req, res) => {
     try {
       const { id } = req.params;
-      await pool.query('DELETE FROM users WHERE id = $1', [id]);
-      res.json({ message: 'User deleted' });
+
+      const result = await pool.query('DELETE FROM users WHERE user_id = $1 RETURNING *', [id]);
+      if (result.rowCount === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      res.json({ message: 'User deleted successfully' });
     } catch (error) {
+      console.error("Error deleting user:", error);
       res.status(500).json({ error: error.message });
     }
   },
@@ -58,10 +74,9 @@ module.exports = {
         return res.status(400).json({ message: "Invalid password" });
       }
 
-      const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '1h' });
+      const token = jwt.sign({ userId: user.user_id }, JWT_SECRET, { expiresIn: '1h' });
 
       res.json({ message: "Login successful", token });
-
     } catch (error) {
       console.error("Error during login:", error);
       res.status(500).json({ message: "Server error" });
